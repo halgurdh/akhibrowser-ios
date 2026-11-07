@@ -98,6 +98,39 @@ final class ContentBlockerTests: XCTestCase {
         XCTAssertEqual(subject.currentlyEnabledLists(), [ASAdBlockerListFetcher.adBlockerRecordID])
     }
 
+    func testAkhiSiteProtection_blocksListedDomainsAndSubdomains() {
+        let hashes = [AkhiSiteProtection.hash("example.com")]
+        let protection = AkhiSiteProtection(adultHashes: hashes, haramHashes: [])
+
+        XCTAssertEqual(AkhiSiteProtection.hash("example.com"), 6298361471204529350)
+        XCTAssertEqual(protection.blockedCategory(for: URL(string: "https://www.example.com/path")!), .adult)
+        XCTAssertNil(protection.blockedCategory(for: URL(string: "https://example.net")!))
+    }
+
+    func testAkhiSiteProtection_blocksHaramTLDsAndDomainLabels() {
+        let protection = AkhiSiteProtection(adultHashes: [], haramHashes: [])
+
+        XCTAssertEqual(protection.blockedCategory(for: URL(string: "https://casino.example")!), .haram)
+        XCTAssertEqual(protection.blockedCategory(for: URL(string: "https://example.bet")!), .haram)
+        XCTAssertNil(protection.blockedCategory(for: URL(string: "https://example.com")!))
+    }
+
+    func testAkhiSiteProtection_appliesStrictSafeSearch() {
+        let cases = [
+            ("https://www.google.com/search?q=test", "safe", "active"),
+            ("https://www.bing.com/search?q=test", "adlt", "strict"),
+            ("https://duckduckgo.com/?q=test", "kp", "1"),
+            ("https://search.yahoo.com/search?p=test", "vm", "r")
+        ]
+
+        for (rawURL, key, expectedValue) in cases {
+            let url = URL(string: rawURL)!
+            let safeURL = AkhiSiteProtection.safeSearchURL(for: url)
+            let components = URLComponents(url: safeURL ?? url, resolvingAgainstBaseURL: false)!
+            XCTAssertEqual(components.queryItems?.first(where: { $0.name == key })?.value, expectedValue)
+        }
+    }
+
     func testReloadAdBlockerList_secondCallWithSameJSON_skipsRecompile() async {
         let mock = MockAdBlockerListFetcher(jsonToReturn: Self.validRuleJSON)
         ContentBlocker.shared.adBlockerListFetcher = mock

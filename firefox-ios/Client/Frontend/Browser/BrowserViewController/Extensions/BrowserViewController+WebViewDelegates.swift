@@ -632,6 +632,31 @@ extension BrowserViewController: WKNavigationDelegate {
             return
         }
 
+        if navigationAction.targetFrame?.isMainFrame ?? true,
+           let scheme = url.scheme?.lowercased(),
+           ["http", "https"].contains(scheme) {
+            switch AkhiSiteProtection.shared {
+            case .success(let protection):
+                if let category = protection.blockedCategory(for: url) {
+                    decisionHandler(.cancel)
+                    showAkhiBlockedAlert(for: url, category: category, webView: webView)
+                    return
+                }
+
+                if let safeSearchURL = AkhiSiteProtection.safeSearchURL(for: url) {
+                    decisionHandler(.cancel)
+                    webView.load(URLRequest(url: safeSearchURL))
+                    return
+                }
+            case .failure(let error):
+                logger.log(
+                    "Akhi site protection is unavailable: \(error.localizedDescription)",
+                    level: .error,
+                    category: .webview
+                )
+            }
+        }
+
         if tab == tabManager.selectedTab,
            navigationAction.navigationType == .linkActivated,
            !tab.adsTelemetryUrlList.isEmpty {
@@ -728,6 +753,26 @@ extension BrowserViewController: WKNavigationDelegate {
         }
 
         decisionHandler(.cancel)
+    }
+
+    private func showAkhiBlockedAlert(
+        for url: URL,
+        category: AkhiBlockedCategory,
+        webView: WKWebView
+    ) {
+        guard tabManager.selectedTab?.webView === webView,
+              presentedViewController == nil else {
+            return
+        }
+
+        let reason = category == .adult ? "adult content" : "restricted content"
+        let alert = UIAlertController(
+            title: "Blocked by AkhiBrowser",
+            message: "\(url.host ?? url.absoluteString) is blocked as \(reason).",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 
     private func handleAdsTelemetryForNavigation(url: URL, tab: Tab) {

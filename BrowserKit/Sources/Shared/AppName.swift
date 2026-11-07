@@ -5,7 +5,13 @@
 import UIKit
 
 public enum AppName: String, CustomStringConvertible {
-    case shortName = "Firefox"
+    case firefox = "Firefox"
+    case akhiBrowser = "AkhiBrowser"
+
+    public static var shortName: AppName {
+        let displayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String
+        return AppName(rawValue: displayName ?? "") ?? .firefox
+    }
 
     public var description: String {
         return self.rawValue

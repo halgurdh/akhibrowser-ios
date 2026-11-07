@@ -1,12 +1,9 @@
-# Firefox for iOS
+# AkhiBrowser for iOS
 
-This is the subdirectory that contains the Firefox for iOS application.
+This subdirectory contains the AkhiBrowser app configuration, based on Mozilla Firefox for iOS. Upstream code and
+license notices are retained; the Focus app is not rebranded.
 
 For details on compatible Xcode and Swift versions used to build this project, as well as the minimum iOS version, refer to the root [README](../README.md).
-
-## Getting Involved
-
-For information on how to contribute to this project, including communication channels, coding style, PR naming guidelines and more, visit the [Contribution guidelines](https://github.com/mozilla-mobile/firefox-ios/blob/main/CONTRIBUTING.md).
 
 ## Building the code
 
@@ -18,18 +15,18 @@ For information on how to contribute to this project, including communication ch
    ```
 1. Clone the repository:
    ```shell
-   git clone https://github.com/mozilla-mobile/firefox-ios
+   git clone https://github.com/halgurdh/akhibrowser-ios
    ```
 1. Change directories to the project root:
    ```shell
-   cd firefox-ios
+   cd akhibrowser-ios
    ```
 1. From the project root, install Node.js dependencies, build user scripts and update content blocker:
    ```shell
    sh ./bootstrap.sh
    ```
 1. Open the `Client.xcodeproj` under the `firefox-ios` folder in Xcode.
-1. Make sure to select the `Fennec` [scheme](https://developer.apple.com/documentation/xcode/build-system?changes=_2) in Xcode.
+1. Select the `Firefox` scheme to build the AkhiBrowser configuration. The `Fennec` scheme is the upstream development configuration.
 1. Select the destination device you want to build on.
 1. Run the app with `Cmd + R` or by pressing the `build and run` button.
 1. On your first build in Xcode, you may be asked to approve the `ModifiedCopy` Swift macro. Click `Trust & Enable` to let the build continue. This is expected, and the prompt comes back if the macro package changes.

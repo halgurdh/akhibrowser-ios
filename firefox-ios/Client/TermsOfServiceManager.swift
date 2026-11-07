@@ -10,7 +10,7 @@ import OnboardingKit
 
 enum Links {
     static let termsOfService = "https://www.mozilla.org/about/legal/terms/firefox/"
-    static let privacyNotice = "https://www.mozilla.org/privacy/firefox/"
+    static let privacyNotice = "https://github.com/halgurdh/akhiBrowser/blob/main/PRIVACY.md"
 }
 
 struct TermsOfServiceManager: FeatureFlaggable, Sendable {
@@ -49,7 +49,7 @@ struct TermsOfServiceManager: FeatureFlaggable, Sendable {
     static var brandRefreshTermsOfUseConfiguration: OnboardingKitCardInfoModel {
         let termsOfUseLink = String(
             format: .Onboarding.Modern.BrandRefresh.TermsOfUse.TermsOfUseLink,
-            AppName.shortName.rawValue
+            AppName.firefox.rawValue
         )
         let termsOfUseAgreement = String(
             format: .Onboarding.Modern.BrandRefresh.TermsOfUse.TermsOfUseAgreement,

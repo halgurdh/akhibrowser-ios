@@ -1,0 +1,12 @@
+{
+  "data" : [
+    {
+      "filename" : "adult.bin",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
