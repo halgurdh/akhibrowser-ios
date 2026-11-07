@@ -36,6 +36,9 @@ Steps: [Automated Project Setup with FXIOS](https://github.com/mozilla-mobile/fi
 - [iOS app build instructions](./firefox-ios/README.md)
 - [Focus iOS](./focus-ios/README.md)
 
+For the AkhiBrowser iOS macOS build, test, signing and release handoff, see
+[the macOS release guide](./docs/akhibrowser-ios-macos-release.md).
+
 ## License
 
 This project includes code from Firefox for iOS and Focus iOS. Keep all applicable upstream notices and comply with the licenses of each component.

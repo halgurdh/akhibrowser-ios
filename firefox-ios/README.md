@@ -3,6 +3,8 @@
 This subdirectory contains the AkhiBrowser app configuration, based on Mozilla Firefox for iOS. Upstream code and
 license notices are retained; the Focus app is not rebranded.
 
+For the macOS testing, signing and release checklist, see the [AkhiBrowser iOS release guide](../docs/akhibrowser-ios-macos-release.md).
+
 For details on compatible Xcode and Swift versions used to build this project, as well as the minimum iOS version, refer to the root [README](../README.md).
 
 ## Building the code
