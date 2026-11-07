@@ -92,10 +92,12 @@ Resolve and document each item before creating an App Store or TestFlight releas
    unused capabilities, configure the Akhi Apple Developer team and provisioning, and confirm any restricted
    entitlement is approved for the distribution account. Do not ship with Mozilla identifiers or capabilities that
    are not authorized for the Akhi app.
-2. **Legal and privacy disclosures.** The app's Terms of Service URL still points to Mozilla's Firefox terms. The
-   linked Akhi privacy policy must be published and accurately cover the shipped iOS app, inherited Mozilla and
-   third-party services, telemetry, Sync, permissions, and filtering. Complete App Store Connect privacy disclosures
-   from verified data flows; the current draft explicitly says it is not a complete release disclosure.
+2. **Legal and privacy disclosures.** No AkhiBrowser Terms page is published yet, so the onboarding screen no longer
+   links to Mozilla's Firefox terms or claims acceptance of them. Publish and review AkhiBrowser terms before
+   presenting a terms link or making a release that requires them. The privacy link goes to the Akhi site, but its
+   policy must accurately cover the shipped iOS app, inherited Mozilla and third-party services, telemetry, Sync,
+   permissions, and filtering. Complete App Store Connect privacy disclosures from verified data flows; the current
+   policy does not yet provide a complete iOS release disclosure.
 3. **Product readiness.** Decide whether the App Store product is the current native browser only or also includes a
    separately delivered Safari Web Extension. Implement and test any promised features; do not describe prototype or
    unimplemented extension features as available.

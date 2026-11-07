@@ -90,11 +90,7 @@ final class LaunchCoordinator: BaseCoordinator,
         let viewModel = TermsOfUseFlowViewModel(
             configuration: TermsOfServiceManager.brandRefreshTermsOfUseConfiguration,
             variant: onboardingKitVariant,
-            onTermsOfUseTap: { [weak self] in
-                guard let self = self else { return }
-                TermsOfServiceTelemetry().termsOfServiceLinkTapped()
-                presentLink(with: URL(string: Links.termsOfService))
-            },
+            onTermsOfUseTap: {},
             onPrivacyNoticeTap: { [weak self] in
                 guard let self = self else { return }
                 TermsOfServiceTelemetry().termsOfServicePrivacyNoticeLinkTapped()

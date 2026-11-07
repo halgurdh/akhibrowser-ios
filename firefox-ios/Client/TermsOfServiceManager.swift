@@ -9,8 +9,7 @@ import MozillaAppServices
 import OnboardingKit
 
 enum Links {
-    static let termsOfService = "https://www.mozilla.org/about/legal/terms/firefox/"
-    static let privacyNotice = "https://github.com/halgurdh/akhiBrowser/blob/main/PRIVACY.md"
+    static let privacyNotice = "https://akhibrowser.com/#privacy"
 }
 
 struct TermsOfServiceManager: FeatureFlaggable, Sendable {
@@ -47,14 +46,6 @@ struct TermsOfServiceManager: FeatureFlaggable, Sendable {
     // MARK: - Terms of Use Configuration
 
     static var brandRefreshTermsOfUseConfiguration: OnboardingKitCardInfoModel {
-        let termsOfUseLink = String(
-            format: .Onboarding.Modern.BrandRefresh.TermsOfUse.TermsOfUseLink,
-            AppName.firefox.rawValue
-        )
-        let termsOfUseAgreement = String(
-            format: .Onboarding.Modern.BrandRefresh.TermsOfUse.TermsOfUseAgreement,
-            termsOfUseLink
-        )
         let privacyNoticeLink = String.Onboarding.Modern.BrandRefresh.TermsOfUse.PrivacyNoticeLink
         let privacyAgreement = String(
             format: .Onboarding.Modern.BrandRefresh.TermsOfUse.PrivacyNoticeAgreement,
@@ -86,12 +77,6 @@ struct TermsOfServiceManager: FeatureFlaggable, Sendable {
             a11yIdRoot: AccessibilityIdentifiers.TermsOfService.root,
             imageID: ImageIdentifiers.homeHeaderLogoBall,
             embededLinkText: [
-                EmbeddedLink(
-                    fullText: termsOfUseAgreement,
-                    linkText: termsOfUseLink,
-                    action: .openTermsOfService,
-                    accessibilityIdentifier: AccessibilityIdentifiers.TermsOfService.termsOfServiceAgreement
-                ),
                 EmbeddedLink(
                     fullText: privacyAgreement,
                     linkText: privacyNoticeLink,

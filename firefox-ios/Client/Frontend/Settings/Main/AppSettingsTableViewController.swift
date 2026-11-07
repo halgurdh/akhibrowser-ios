@@ -517,12 +517,14 @@ class AppSettingsTableViewController: SettingsTableViewController,
     }
 
     private func getAboutSettings() -> [SettingSection] {
-        let aboutSettings = [
+        var aboutSettings: [Setting] = [
             AppStoreReviewSetting(settingsDelegate: parentCoordinator),
             VersionSetting(settingsDelegate: self),
-            LicenseAndAcknowledgementsSetting(settingsDelegate: parentCoordinator),
-            YourRightsSetting(settingsDelegate: parentCoordinator)
+            LicenseAndAcknowledgementsSetting(settingsDelegate: parentCoordinator)
         ]
+        if AppName.shortName != .akhiBrowser {
+            aboutSettings.append(YourRightsSetting(settingsDelegate: parentCoordinator))
+        }
 
         return [SettingSection(title: NSAttributedString(string: .AppSettingsAbout),
                                children: aboutSettings)]

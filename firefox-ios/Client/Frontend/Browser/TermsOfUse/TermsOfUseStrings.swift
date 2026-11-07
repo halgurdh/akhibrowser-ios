@@ -49,10 +49,15 @@ enum TermsOfUseLinkType: CaseIterable {
     var url: URL? {
         switch self {
         case .termsOfUse:
+            guard AppName.shortName != .akhiBrowser else { return nil }
             return SupportUtils.URLForTermsOfUse
         case .privacyNotice:
+            if AppName.shortName == .akhiBrowser {
+                return URL(string: Links.privacyNotice)
+            }
             return SupportUtils.URLForPrivacyNotice
         case .learnMore, .here:
+            guard AppName.shortName != .akhiBrowser else { return nil }
             return SupportUtils.URLForTopic("firefox-terms-of-use-faq", useMobilePath: false)
         }
     }
