@@ -1,0 +1,118 @@
+# AkhiBrowser for iOS in the Simulator: build, the site protection tests, and screenshots of the app, unsigned.
+# The artifact holds only what this public repository has, and GitHub deletes it after a day.
+name: AkhiBrowser iOS build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - akhi-*
+    paths-ignore:
+      - "**.md"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 120
+    env:
+      DERIVED: ${{ github.workspace }}/DerivedData
+      OUT: ${{ github.workspace }}/out
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select the newest Xcode
+        run: |
+          xcode=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | sort -V | tail -n 1)
+          xcode=${xcode:-$(ls -d /Applications/Xcode_*.app | sort -V | tail -n 1)}
+          sudo xcode-select -s "$xcode/Contents/Developer"
+          xcodebuild -version
+          mkdir -p "$OUT"
+
+      - name: Bootstrap
+        run: sh ./bootstrap.sh firefox > "$OUT/bootstrap.log" 2>&1 || { tail -n 40 "$OUT/bootstrap.log"; exit 1; }
+
+      - name: Pick a simulator
+        run: |
+          udid=$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          devices = json.load(sys.stdin)["devices"]
+          runtimes = sorted((r for r in devices if "iOS" in r), key=lambda r: [int(x) for x in r.rsplit("iOS-", 1)[1].split("-")])
+          print(next(d["udid"] for r in reversed(runtimes) for d in devices[r] if d["name"].startswith("iPhone")))')
+          echo "UDID=$udid" >> "$GITHUB_ENV"
+          xcrun simctl list devices | grep "$udid"
+
+      - name: Build
+        working-directory: firefox-ios
+        run: |
+          xcodebuild -resolvePackageDependencies -onlyUsePackageVersionsFromResolvedFile > "$OUT/resolve.log" 2>&1
+          xcodebuild build-for-testing -project Client.xcodeproj -scheme Firefox -configuration Debug \
+            -destination "id=$UDID" -derivedDataPath "$DERIVED" -skipMacroValidation \
+            COMPILER_INDEX_STORE_ENABLE=NO CODE_SIGN_IDENTITY= CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
+            > "$OUT/build.log" 2>&1 || { grep -E "error:|BUILD FAILED" "$OUT/build.log" | head -n 60; exit 1; }
+
+      - name: Site protection tests
+        working-directory: firefox-ios
+        continue-on-error: true
+        run: |
+          python3 - <<'EOF'
+          import json
+          path = "firefox-ios-tests/Tests/UnitTest.xctestplan"
+          plan = json.load(open(path))
+          for target in plan["testTargets"]:
+              if "ContentBlockerTests" in target.get("skippedTests", []):
+                  target["skippedTests"].remove("ContentBlockerTests")
+          json.dump(plan, open(path, "w"), indent=2)
+          EOF
+          xcodebuild test-without-building -project Client.xcodeproj -scheme Firefox -testPlan UnitTest \
+            -destination "id=$UDID" -derivedDataPath "$DERIVED" -only-testing:ClientTests/ContentBlockerTests \
+            -resultBundlePath "$OUT/ContentBlockerTests.xcresult" > "$OUT/tests.log" 2>&1
+          result=$?
+          grep -E "Test Case|Executed|TEST (SUCCEEDED|FAILED)" "$OUT/tests.log" | tail -n 40
+          exit $result
+
+      - name: Screenshots
+        continue-on-error: true
+        run: |
+          app=$(find "$DERIVED/Build/Products" -path "*iphonesimulator/Client.app" -maxdepth 3 | head -n 1)
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl install "$UDID" "$app"
+          id=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$app/Info.plist")
+          echo "Bundle id: $id"
+          shot() { sleep "$2"; xcrun simctl io "$UDID" screenshot "$OUT/$1.png"; }
+          xcrun simctl launch "$UDID" "$id"
+          shot 1-first-start 20
+          xcrun simctl terminate "$UDID" "$id"
+          xcrun simctl launch "$UDID" "$id" FIREFOX_TEST FIREFOX_SKIP_INTRO FIREFOX_SKIP_WHATS_NEW \
+            FIREFOX_SKIP_ETP_COVER_SHEET FIREFOX_SKIP_CONTEXTUAL_HINTS FIREFOX_SKIP_TERMS_OF_USE \
+            SKIP_DEFAULT_BROWSER_ONBOARDING
+          shot 2-home 15
+          open_url() { xcrun simctl openurl "$UDID" "firefox://open-url?url=$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$1")"; }
+          open_url "https://www.wikipedia.org/"
+          shot 3-ordinary-site 12
+          open_url "https://www.pornhub.com/"
+          shot 4-adult-site-blocked 12
+          open_url "https://www.google.com/search?q=test"
+          shot 5-google-safesearch 12
+          open_url "https://www.bing.com/search?q=test"
+          shot 6-bing-safesearch 12
+
+      - name: Package the app
+        if: always()
+        run: |
+          app=$(find "$DERIVED/Build/Products" -path "*iphonesimulator/Client.app" -maxdepth 3 | head -n 1)
+          if [ -n "$app" ]; then
+            ditto -c -k --keepParent "$app" "$OUT/AkhiBrowser-ios-simulator.app.zip"
+          fi
+          rm -rf "$OUT"/*.xcresult/Staging 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: akhibrowser-ios-${{ github.run_number }}
+          path: out
+          retention-days: 1
