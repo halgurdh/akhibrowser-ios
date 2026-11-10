@@ -651,7 +651,7 @@ extension BrowserViewController: WKNavigationDelegate {
             case .failure(let error):
                 logger.log(
                     "Akhi site protection is unavailable: \(error.localizedDescription)",
-                    level: .error,
+                    level: .warning,
                     category: .webview
                 )
             }
