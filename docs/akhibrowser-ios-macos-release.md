@@ -29,6 +29,42 @@ Open `firefox-ios/Client.xcodeproj` and select the shared `Firefox` scheme. In t
 `Firefox.xcconfig`, which selects the AkhiBrowser display name, bundle identifier, and app icon. `Fennec` is the
 upstream development scheme and is not the AkhiBrowser app configuration.
 
+## Signing with the Akhi Apple Developer account
+
+The `Firefox` configuration (the AkhiBrowser app, its extensions and widgets) uses automatic signing with the Akhi
+team, never Mozilla's. Its identifiers: the app `org.akhibrowser.ios`, extensions `org.akhibrowser.ios.<name>`, app
+group `group.org.akhibrowser.ios`, keychain group `<Team ID>.org.akhibrowser.ios`. The app derives the app group and
+keychain group from its bundle identifier, so the entitlements must keep matching it.
+
+```sh
+cp firefox-ios/Client/Configuration/AkhiSigning.xcconfig.example firefox-ios/Client/Configuration/AkhiSigning.xcconfig
+# then put the Team ID from developer.apple.com/account (Membership details) in it
+```
+
+`AkhiSigning.xcconfig` is ignored by git. Simulator builds need no Team ID. With one, Xcode registers the identifiers
+and app group and makes the profiles itself (Xcode, Settings, Accounts: sign in with the Akhi Apple ID once).
+
+The entitlements `com.apple.developer.web-browser` (being chosen as default browser) and
+`com.apple.developer.browser.app-installation` were removed: Apple grants them only on request, and automatic signing
+fails while they are listed. Request the default browser entitlement from Apple for `org.akhibrowser.ios`, and once it
+is granted add it back to `firefox-ios/Client/Entitlements/FirefoxApplication.entitlements`.
+
+## Build in one command
+
+```sh
+scripts/akhi-ios-build.sh simulator   # build for the Simulator
+scripts/akhi-ios-build.sh test        # site-protection tests (see below about skipped tests)
+scripts/akhi-ios-build.sh archive     # signed archive and .ipa for TestFlight
+```
+
+## Xcode Cloud
+
+`firefox-ios/ci_scripts/ci_post_clone.sh` runs the bootstrap on Xcode Cloud. Once, on a Mac: open
+`firefox-ios/Client.xcodeproj`, Product, Xcode Cloud, Create Workflow, choose the `Firefox` scheme and grant access to
+the `halgurdh/akhibrowser-ios` repository. In the workflow's Environment, add the variable `AKHI_DEVELOPMENT_TEAM` with
+the Team ID. An Archive action with TestFlight deployment then uploads each build. 25 compute hours a month are
+included with the developer membership.
+
 ## Build and test in Simulator
 
 Choose a simulator name and iOS version shown by `xcrun simctl list devices available`, then substitute it below:
@@ -86,12 +122,10 @@ extension development and device testing are a separate workstream in the privat
 
 Resolve and document each item before creating an App Store or TestFlight release:
 
-1. **Apple signing and entitlements.** `FirefoxApplication.entitlements` still contains Mozilla app-group and
-   keychain identifiers plus browser, push-notification, Sign in with Apple, and other capabilities. Review every
-   entitlement and service integration. Replace identifiers with Akhi-owned identifiers where appropriate, remove
-   unused capabilities, configure the Akhi Apple Developer team and provisioning, and confirm any restricted
-   entitlement is approved for the distribution account. Do not ship with Mozilla identifiers or capabilities that
-   are not authorized for the Akhi app.
+1. **Apple signing and entitlements.** Done: Akhi identifiers, automatic signing with the Akhi team, and the
+   entitlements Apple grants only on request removed (see Signing above). Still to do: request the default browser
+   entitlement; decide whether push notifications, Sign in with Apple and the password AutoFill extension stay, as they
+   came with Firefox's account and Sync services.
 2. **Legal and privacy disclosures.** No AkhiBrowser Terms page is published yet, so the onboarding screen no longer
    links to Mozilla's Firefox terms or claims acceptance of them. Publish and review AkhiBrowser terms before
    presenting a terms link or making a release that requires them. The privacy link goes to the Akhi site, but its

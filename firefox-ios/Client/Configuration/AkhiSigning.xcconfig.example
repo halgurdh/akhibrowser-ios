@@ -1,0 +1,3 @@
+// Copy to AkhiSigning.xcconfig (not committed) and fill in the Team ID of the AkhiBrowser Apple Developer account:
+// developer.apple.com/account, Membership details. Xcode then signs the AkhiBrowser app and its extensions itself.
+AKHI_DEVELOPMENT_TEAM = ABCDE12345

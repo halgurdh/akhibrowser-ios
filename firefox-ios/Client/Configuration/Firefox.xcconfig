@@ -6,6 +6,11 @@
 #include "Release.xcconfig"
 #include "version.xcconfig"
 
+// Your Apple Team ID goes in AkhiSigning.xcconfig, next to this file: see AkhiSigning.xcconfig.example
+AKHI_DEVELOPMENT_TEAM =
+#include? "AkhiSigning.xcconfig"
+DEVELOPMENT_TEAM = $(AKHI_DEVELOPMENT_TEAM)
+
 MOZ_BUNDLE_DISPLAY_NAME = AkhiBrowser
 MOZ_BUNDLE_ID = org.akhibrowser.ios
 ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon_Akhi

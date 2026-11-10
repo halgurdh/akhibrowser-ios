@@ -152,3 +152,5 @@ LicensePlistTemp
 # Claude Code
 .claude/settings.local.json
 .mcp.json
+# Apple Team ID of the AkhiBrowser app
+firefox-ios/Client/Configuration/AkhiSigning.xcconfig
