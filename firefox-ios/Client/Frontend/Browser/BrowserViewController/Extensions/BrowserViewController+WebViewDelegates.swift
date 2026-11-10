@@ -10,6 +10,7 @@ import UIKit
 import Photos
 import SafariServices
 import WebEngine
+import AkhiKit
 
 // MARK: - WKUIDelegate
 extension BrowserViewController: WKUIDelegate {
@@ -632,31 +633,6 @@ extension BrowserViewController: WKNavigationDelegate {
             return
         }
 
-        if navigationAction.targetFrame?.isMainFrame ?? true,
-           let scheme = url.scheme?.lowercased(),
-           ["http", "https"].contains(scheme) {
-            switch AkhiSiteProtection.shared {
-            case .success(let protection):
-                if let category = protection.blockedCategory(for: url) {
-                    decisionHandler(.cancel)
-                    showAkhiBlockedAlert(for: url, category: category, webView: webView)
-                    return
-                }
-
-                if let safeSearchURL = AkhiSiteProtection.safeSearchURL(for: url) {
-                    decisionHandler(.cancel)
-                    webView.load(URLRequest(url: safeSearchURL))
-                    return
-                }
-            case .failure(let error):
-                logger.log(
-                    "Akhi site protection is unavailable: \(error.localizedDescription)",
-                    level: .warning,
-                    category: .webview
-                )
-            }
-        }
-
         if tab == tabManager.selectedTab,
            navigationAction.navigationType == .linkActivated,
            !tab.adsTelemetryUrlList.isEmpty {
@@ -732,6 +708,33 @@ extension BrowserViewController: WKNavigationDelegate {
         // This is the normal case, opening a http or https url, which we handle by loading them in this WKWebView.
         // We always allow this. Additionally, data URIs are also handled just like normal web pages.
         if let scheme = url.scheme, ["http", "https", "blob", "file"].contains(scheme) {
+            if navigationAction.targetFrame?.isMainFrame ?? true, ["http", "https"].contains(scheme.lowercased()) {
+                Task { @MainActor [weak self] in
+                    let decision = await AkhiProtection.shared.decision(for: url)
+                    guard let self else {
+                        decisionHandler(.cancel)
+                        return
+                    }
+                    switch decision {
+                    case .allow:
+                        self.handleWebURLNavigation(
+                            webView: webView,
+                            url: url,
+                            tab: tab,
+                            navigationAction: navigationAction,
+                            shouldBlockExternalApps: shouldBlockExternalApps,
+                            decisionHandler: decisionHandler
+                        )
+                    case .block(let category):
+                        decisionHandler(.cancel)
+                        self.showAkhiBlockedAlert(for: url, category: category, webView: webView)
+                    case .redirect(let target):
+                        decisionHandler(.cancel)
+                        webView.load(URLRequest(url: target))
+                    }
+                }
+                return
+            }
             handleWebURLNavigation(
                 webView: webView,
                 url: url,
@@ -757,7 +760,7 @@ extension BrowserViewController: WKNavigationDelegate {
 
     private func showAkhiBlockedAlert(
         for url: URL,
-        category: AkhiBlockedCategory,
+        category: AkhiCategory,
         webView: WKWebView
     ) {
         guard tabManager.selectedTab?.webView === webView,
@@ -765,13 +768,19 @@ extension BrowserViewController: WKNavigationDelegate {
             return
         }
 
-        let reason = category == .adult ? "adult content" : "restricted content"
+        let protection = AkhiProtection.shared
         let alert = UIAlertController(
-            title: "Blocked by AkhiBrowser",
-            message: "\(url.host ?? url.absoluteString) is blocked as \(reason).",
+            title: protection.blockedTitle(),
+            message: "\(url.host ?? url.absoluteString)\n\n\(protection.blockedReason(for: category))",
             preferredStyle: .alert
         )
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        alert.addAction(UIAlertAction(title: protection.text("goBack"), style: .default))
+        if category.canContinue {
+            alert.addAction(UIAlertAction(title: protection.text("continueAnyway"), style: .destructive) { _ in
+                protection.continueAnyway(to: url, category: category)
+                webView.load(URLRequest(url: url))
+            })
+        }
         present(alert, animated: true)
     }
 

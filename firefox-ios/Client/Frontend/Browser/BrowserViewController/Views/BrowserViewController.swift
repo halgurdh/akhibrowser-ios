@@ -17,6 +17,7 @@ import SummarizeKit
 import ActivityKit
 import Glean
 import QuickAnswersKit
+import AkhiKit
 
 import class Account.RustFirefoxAccounts
 import class MozillaAppServices.BookmarkFolderData
@@ -1131,6 +1132,12 @@ class BrowserViewController: UIViewController,
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        AkhiProtection.shared.warmUp()
+        Task {
+            await AkhiProtection.shared.applyYouTubeRestrictedMode(
+                to: WKWebsiteDataStore.default().httpCookieStore
+            )
+        }
 
         #if compiler(>=6.4)
         if #available(iOS 27.1, *) {

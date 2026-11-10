@@ -1,5 +1,6 @@
 # AkhiBrowser for iOS in the Simulator: build, the site protection tests, and screenshots of the app, unsigned.
-# The artifact holds only what this public repository has, and GitHub deletes it after a day.
+# With the private akhi-extension submodule (AkhiKit) it needs the secret AKHI_SUBMODULES_TOKEN, read access to it.
+# The artifact holds the Simulator app, logs and screenshots, and GitHub deletes it after a day.
 name: AkhiBrowser iOS build
 
 on:
@@ -23,6 +24,10 @@ jobs:
       OUT: ${{ github.workspace }}/out
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.AKHI_SUBMODULES_TOKEN || github.token }}
+          persist-credentials: false
 
       - name: Select the newest Xcode
         run: |
@@ -54,7 +59,19 @@ jobs:
             COMPILER_INDEX_STORE_ENABLE=NO CODE_SIGN_IDENTITY= CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
             > "$OUT/build.log" 2>&1 || { grep -E "error:|BUILD FAILED" "$OUT/build.log" | head -n 60; exit 1; }
 
+      - name: AkhiKit tests
+        if: hashFiles('akhi-extension/ios/Package.swift') != ''
+        working-directory: akhi-extension/ios
+        continue-on-error: true
+        run: |
+          xcodebuild test -scheme AkhiKit -destination "id=$UDID" -derivedDataPath "$RUNNER_TEMP/AkhiKit" \
+            -resultBundlePath "$OUT/AkhiKitTests.xcresult" > "$OUT/akhikit-tests.log" 2>&1
+          result=$?
+          grep -E "Test Case|Executed|error:|TEST (SUCCEEDED|FAILED)" "$OUT/akhikit-tests.log" | tail -n 40
+          exit $result
+
       - name: Site protection tests
+        if: hashFiles('akhi-extension/ios/Package.swift') == ''
         working-directory: firefox-ios
         continue-on-error: true
         run: |
@@ -103,12 +120,20 @@ jobs:
 
       - name: Package the app
         if: always()
+        env:
+          GH_TOKEN: ${{ secrets.AKHI_SUBMODULES_TOKEN }}
         run: |
           app=$(find "$DERIVED/Build/Products" -path "*iphonesimulator/Client.app" -maxdepth 3 | head -n 1)
-          if [ -n "$app" ]; then
+          [ -n "$app" ] || exit 0
+          if [ -d akhi-extension/ios ]; then
+            # The app holds AkhiKit's private files: to the private draft release, not the public artifact
+            ditto -c -k --keepParent "$app" "$RUNNER_TEMP/AkhiBrowser-ios-simulator.app.zip"
+            gh release create "ios-build-${{ github.run_number }}" "$RUNNER_TEMP/AkhiBrowser-ios-simulator.app.zip" \
+              --repo halgurdh/akhi-extension --draft --title "iOS build ${{ github.run_number }}" \
+              --notes "Simulator, unsigned, from ${{ github.sha }}"
+          else
             ditto -c -k --keepParent "$app" "$OUT/AkhiBrowser-ios-simulator.app.zip"
           fi
-          rm -rf "$OUT"/*.xcresult/Staging 2>/dev/null || true
 
       - uses: actions/upload-artifact@v4
         if: always()

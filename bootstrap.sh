@@ -37,6 +37,10 @@ if [[ "$PRODUCT" == "firefox" ]]; then
     # Install Node.js dependencies and build user scripts
     npm install
     npm run build
+
+    # AkhiKit, the protections of AkhiBrowser, from the private akhi-extension submodule
+    git submodule update --init akhi-extension
+    sh ./akhi-extension/ios/sync_resources.sh
     
 elif [[ "$PRODUCT" == "focus" ]]; then
     echo "Running Focus script..."

@@ -1,0 +1,4 @@
+[submodule "akhi-extension"]
+	path = akhi-extension
+	url = https://github.com/halgurdh/akhi-extension.git
+	branch = ios-akhikit

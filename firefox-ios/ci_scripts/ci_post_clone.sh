@@ -10,6 +10,7 @@ if ! command -v node >/dev/null 2>&1; then
     brew install node
 fi
 
+git submodule update --init --recursive
 sh ./bootstrap.sh firefox
 
 if [ -n "${AKHI_DEVELOPMENT_TEAM:-}" ]; then
