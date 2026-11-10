@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import WebKit
+import AkhiKit
 
 @MainActor
 class UserScriptManager {
@@ -158,6 +159,10 @@ class UserScriptManager {
         }
         if backgroundAudio {
             webView?.configuration.userContentController.addUserScript(backgroundAudioUserScript)
+        }
+        // AkhiBrowser's Premium and Family features of the pages, in their own content world (AkhiKit)
+        if let webView {
+            AkhiPageScripts.shared.install(in: webView)
         }
     }
 }

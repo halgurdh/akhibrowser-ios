@@ -2,3 +2,7 @@
 	path = akhi-extension
 	url = https://github.com/halgurdh/akhi-extension.git
 	branch = ios-akhikit
+[submodule "akhi-premium"]
+	path = akhi-premium
+	url = https://github.com/halgurdh/akhibrowser-premium.git
+	branch = main

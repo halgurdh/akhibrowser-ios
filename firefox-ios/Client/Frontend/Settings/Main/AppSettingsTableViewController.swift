@@ -6,6 +6,8 @@ import Common
 import UIKit
 import Shared
 import Glean
+import SwiftUI
+import AkhiKit
 
 import struct MozillaAppServices.VisitObservation
 
@@ -330,6 +332,7 @@ class AppSettingsTableViewController: SettingsTableViewController,
         setupDataSettings()
         var settings = [SettingSection]()
         settings += getDefaultBrowserSetting()
+        settings += [SettingSection(children: [AkhiPremiumSetting(theme: currentTheme())])]
         settings += getAccountSetting()
         settings += getGeneralSettings()
         settings += getPrivacySettings()
@@ -696,5 +699,22 @@ class AppSettingsTableViewController: SettingsTableViewController,
             return UIView()
         }
         return headerView
+    }
+}
+
+/// AkhiBrowser Premium: the plans with In-App Purchase, and the Premium and Family features of the pages (AkhiKit)
+final class AkhiPremiumSetting: Setting {
+    override var accessoryType: UITableViewCell.AccessoryType { return .disclosureIndicator }
+
+    init(theme: Theme) {
+        super.init(title: NSAttributedString(
+            string: AkhiProtection.shared.text("premium"),
+            attributes: [NSAttributedString.Key.foregroundColor: theme.colors.textPrimary]
+        ))
+    }
+
+    override func onClick(_ navigationController: UINavigationController?) {
+        let page = NavigationView { AkhiPremiumView() }.navigationViewStyle(.stack)
+        navigationController?.pushViewController(UIHostingController(rootView: page), animated: true)
     }
 }
