@@ -3,15 +3,14 @@
 This guide covers continuing the AkhiBrowser iOS work on a Mac. The current branch is a development build, not a
 release candidate. Do not submit it to the App Store until the release blockers below are resolved.
 
-## Get the private source and prepare the Mac
+## Get the source and prepare the Mac
 
-Use the private AkhiBrowser repository. Do not push Akhi-only work to the public Mozilla `origin` remote.
+This repository is public. The protections come from the private `akhi-extension` repository, a submodule at
+`akhi-extension/` (AkhiKit, in its `ios/` folder): cloning it needs a GitHub account with access to it.
 
 ```sh
-git clone https://github.com/halgurdh/akhibrowser-ios.git
+git clone --recurse-submodules https://github.com/halgurdh/akhibrowser-ios.git
 cd akhibrowser-ios
-git switch main
-git pull --ff-only
 ```
 
 Install the Xcode version required by the repository's root [README](../README.md), open Xcode once to accept its
@@ -113,10 +112,11 @@ After automated tests pass, check at least:
 - On a real iPhone, signing, install, startup, navigation, memory use, and app lifecycle work on the minimum and
   current supported iOS versions.
 
-Current protection covers main-frame domain checks and SafeSearch rewrites. It is not a full replacement for the
-Akhi extension: Akhi-specific ad/resource blocking, image moderation, NoMusic, Premium, and full parental
-controls/settings are not implemented here. No Safari Web Extension Xcode target is included. Safari
-extension development and device testing are a separate workstream in the private `akhi-extension` repository.
+Current protection, from AkhiKit: adult, haram and scam sites and their subdomains on main-frame loads (scam with
+"continue anyway"), blocked searches in 11 languages with a haram search turned into a question, SafeSearch on Google,
+Bing, DuckDuckGo and Yahoo, YouTube Restricted Mode, and the block texts in 12 languages. AkhiKit runs the extension's
+own `lib/content_filter.js` and `lib/search_filter.js` with its `filters/*.bin`, so the decisions match the browser on
+Windows and Android. Not yet: ad blocking, image moderation, NoMusic, Premium and parental controls.
 
 ## Release blockers
 
@@ -163,14 +163,7 @@ an App Store release.
 
 ## Keep Akhi-only work private
 
-This repository is private and has a public Mozilla `origin` remote as well as the private `akhi-ios` remote. Before
-any push, confirm the destination:
-
-```sh
-git remote -v
-git push akhi-ios HEAD:main
-```
-
-Do not push Akhi branding, protection features, filter data, or other Akhi-exclusive implementation to `origin`.
-Keep proprietary extension implementation in its designated private repository; only bring components into this app
-after confirming their license and distribution rights.
+This repository is public, so anyone can read it. Code, lists and features that are AkhiBrowser's own go into
+`akhi-extension` (AkhiKit) or `akhibrowser-premium`, never into this repository; changes here stay small hooks into
+Firefox's files, which are MPL and public anyway. The GitHub build of this repository puts an app with AkhiKit only in
+a private draft release of `akhi-extension`, never in a public artifact.
