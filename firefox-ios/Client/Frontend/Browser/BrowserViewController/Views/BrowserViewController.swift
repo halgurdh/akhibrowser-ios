@@ -1132,6 +1132,7 @@ class BrowserViewController: UIViewController,
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        AkhiProtection.shared.onAdBlockChange = { TabContentBlocker.prefsChanged() }
         AkhiProtection.shared.warmUp()
         Task {
             await AkhiProtection.shared.applyYouTubeRestrictedMode(

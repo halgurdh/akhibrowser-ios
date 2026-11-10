@@ -6,6 +6,7 @@ import WebKit
 import Shared
 import Common
 import CryptoKit
+import AkhiKit
 
 enum BlocklistCategory: CaseIterable {
     case advertising
@@ -234,6 +235,11 @@ class ContentBlocker: Notifiable {
 
         // Add back the block images rule (if needed) after having removed all rules.
         if let rule = blockImagesRule, tab.imageContentBlockingEnabled() {
+            add(contentRuleList: rule, toTab: tab)
+        }
+
+        // AkhiBrowser's ad blocker stays on whatever the tracking protection setting is.
+        if let rule = AkhiProtection.shared.adBlockRuleList {
             add(contentRuleList: rule, toTab: tab)
         }
     }
