@@ -56,7 +56,9 @@ jobs:
           xcodebuild -resolvePackageDependencies -onlyUsePackageVersionsFromResolvedFile > "$OUT/resolve.log" 2>&1
           xcodebuild build-for-testing -project Client.xcodeproj -scheme Firefox -configuration Firefox \
             -destination "id=$UDID" -derivedDataPath "$DERIVED" -skipMacroValidation \
-            COMPILER_INDEX_STORE_ENABLE=NO ENABLE_TESTABILITY=YES CODE_SIGN_IDENTITY= CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO ENABLE_TESTABILITY=YES \
+            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER= \
+            CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=YES \
             > "$OUT/build.log" 2>&1 || { grep -E "error:|BUILD FAILED" "$OUT/build.log" | head -n 60; exit 1; }
 
       - name: Check that the app is AkhiBrowser
@@ -66,6 +68,8 @@ jobs:
           name=$(/usr/libexec/PlistBuddy -c "Print CFBundleDisplayName" "$app/Info.plist" 2>/dev/null || true)
           echo "$id $name"
           [ "$id" = "org.akhibrowser.ios" ] || { echo "::error::Built $id, not AkhiBrowser (org.akhibrowser.ios)"; exit 1; }
+          # the simulator kills a process whose signature doesn't match its binary (SIGKILL, Code Signature Invalid)
+          codesign --verify --deep --strict "$app" || { echo "::error::The app's code signature is invalid"; exit 1; }
 
       - name: AkhiKit tests
         if: hashFiles('akhi-extension/ios/Package.swift') != ''
