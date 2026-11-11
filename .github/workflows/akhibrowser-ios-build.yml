@@ -209,7 +209,9 @@ jobs:
           open_url "https://www.wikipedia.org/"
           shot 3-ordinary-site 12
           open_url "https://www.pornhub.com/"
-          shot 4-adult-site-blocked 12
+          sleep 12
+          xcrun simctl spawn "$UDID" log show --last 20s --style compact \
+            --predicate 'process == "Client" AND eventMessage BEGINSWITH "AkhiKit "' 2>/dev/null | tail -n 15 || true
           open_url "https://www.google.com/search?q=test"
           shot 5-google-safesearch 12
           open_url "https://www.bing.com/search?q=test"
@@ -225,7 +227,13 @@ jobs:
           if [ -d akhi-extension/ios ]; then
             # The app holds AkhiKit's private files: to the private draft release, not the public artifact
             ditto -c -k --keepParent "$app" "$RUNNER_TEMP/AkhiBrowser-ios-simulator.app.zip"
+            # the screenshots for a review, but not the one of the adult site, in case it wasn't blocked
+            screenshots=()
+            for shot in "$OUT"/*.png; do
+              case "$shot" in *adult*) ;; *) [ -f "$shot" ] && screenshots+=("$shot") ;; esac
+            done
             gh release create "ios-build-${{ github.run_number }}" "$RUNNER_TEMP/AkhiBrowser-ios-simulator.app.zip" \
+              "${screenshots[@]}" \
               --repo halgurdh/akhi-extension --draft --title "iOS build ${{ github.run_number }}" \
               --notes "Simulator, unsigned, from ${{ github.sha }}"
           else
