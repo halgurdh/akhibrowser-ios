@@ -57,6 +57,7 @@ jobs:
           xcodebuild build-for-testing -project Client.xcodeproj -scheme Firefox -configuration Firefox \
             -destination "id=$UDID" -derivedDataPath "$DERIVED" -skipMacroValidation \
             COMPILER_INDEX_STORE_ENABLE=NO ENABLE_TESTABILITY=YES ONLY_ACTIVE_ARCH=YES \
+            DEPLOYMENT_POSTPROCESSING=NO STRIP_INSTALLED_PRODUCT=NO COPY_PHASE_STRIP=NO STRIP_SWIFT_SYMBOLS=NO \
             CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER= \
             CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=YES \
             > "$OUT/build.log" 2>&1 || { grep -E "error:|BUILD FAILED" "$OUT/build.log" | head -n 60; exit 1; }
@@ -64,6 +65,20 @@ jobs:
       - name: Check that the app is AkhiBrowser
         run: |
           app=$(find "$DERIVED/Build/Products" -path "*iphonesimulator/Client.app" -maxdepth 3 | head -n 1)
+          # sign every framework, extension and the app again, inside out: the simulator kills a process when the
+          # first page of one of them changed after it was signed (AppAttestKit, WidgetKitExtension)
+          sign() {
+            entitlements="$RUNNER_TEMP/entitlements-$(basename "$1").plist"
+            if codesign -d --entitlements "$entitlements" --xml "$1" 2>/dev/null && [ -s "$entitlements" ]; then
+              codesign --force --sign - --timestamp=none --entitlements "$entitlements" "$1"
+            else
+              codesign --force --sign - --timestamp=none "$1"
+            fi
+          }
+          find "$app" -depth \( -name "*.framework" -o -name "*.dylib" -o -name "*.appex" \) | while read -r part; do
+            sign "$part"
+          done
+          sign "$app"
           id=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$app/Info.plist")
           name=$(/usr/libexec/PlistBuddy -c "Print CFBundleDisplayName" "$app/Info.plist" 2>/dev/null || true)
           echo "$id $name"
@@ -168,7 +183,7 @@ jobs:
             file "$file" | grep -q "Mach-O" || continue
             result=$(codesign --verify --strict "$file" 2>&1 && echo valid)
             echo "${file#$app/}: $(echo "$result" | tail -n 1) | $(codesign -dv "$file" 2>&1 | grep -E "^(Signature|TeamIdentifier|CodeDirectory)" | tr '\n' ' ')"
-          done | head -n 60
+          done
           xcrun simctl spawn "$UDID" log show --last 2m --style compact \
             --predicate 'process == "Client" AND (messageType == error OR messageType == fault OR eventMessage CONTAINS[c] "fatal")' \
             > "$OUT/app-log.txt" 2>&1 || true
