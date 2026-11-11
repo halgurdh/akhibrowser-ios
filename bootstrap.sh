@@ -40,10 +40,11 @@ if [[ "$PRODUCT" == "firefox" ]]; then
 
     # AkhiKit, the protections of AkhiBrowser, from the private akhi-extension submodule
     git submodule update --init akhi-extension
-    # The Premium and Family features of the pages, from the private akhi-premium submodule: without access to it, the
-    # app is built without them
-    git submodule update --init akhi-premium || echo "No access to akhi-premium: the app is built without Premium features"
+    # Premium (AkhiPremiumKit): In-App Purchase and the Premium and Family features of the pages, from the private
+    # akhi-premium submodule; the app links it, so it needs read access to halgurdh/akhibrowser-premium
+    git submodule update --init akhi-premium
     sh ./akhi-extension/ios/sync_resources.sh
+    sh ./akhi-premium/ios/AkhiPremiumKit/sync_resources.sh
     
 elif [[ "$PRODUCT" == "focus" ]]; then
     echo "Running Focus script..."

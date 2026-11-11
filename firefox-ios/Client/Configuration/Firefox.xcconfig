@@ -13,7 +13,8 @@ DEVELOPMENT_TEAM = $(AKHI_DEVELOPMENT_TEAM)
 
 MOZ_BUNDLE_DISPLAY_NAME = AkhiBrowser
 MOZ_BUNDLE_ID = org.akhibrowser.ios
-ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon_Akhi
+// The app icon (AppIcon_Akhi) is set on the Client target in the project: here it would also apply to the extensions,
+// whose catalogs don't have it
 CODE_SIGN_ENTITLEMENTS = Client/Entitlements/FirefoxApplication.entitlements
 CHANNEL = release
 OTHER_SWIFT_FLAGS = $(OTHER_SWIFT_FLAGS_common) -DMOZ_CHANNEL_$(CHANNEL)

@@ -78,6 +78,17 @@ jobs:
           grep -E "Test Case|Executed|error:|TEST (SUCCEEDED|FAILED)" "$OUT/akhikit-tests.log" | tail -n 40
           exit $result
 
+      - name: AkhiPremiumKit tests
+        if: hashFiles('akhi-premium/ios/AkhiPremiumKit/Package.swift') != ''
+        working-directory: akhi-premium/ios/AkhiPremiumKit
+        continue-on-error: true
+        run: |
+          xcodebuild test -scheme AkhiPremiumKit -destination "id=$UDID" -derivedDataPath "$RUNNER_TEMP/AkhiPremiumKit" \
+            -resultBundlePath "$OUT/AkhiPremiumKitTests.xcresult" > "$OUT/akhipremiumkit-tests.log" 2>&1
+          result=$?
+          grep -E "Test Case|Executed|error:|TEST (SUCCEEDED|FAILED)" "$OUT/akhipremiumkit-tests.log" | tail -n 40
+          exit $result
+
       - name: Site protection tests
         if: hashFiles('akhi-extension/ios/Package.swift') == ''
         working-directory: firefox-ios
