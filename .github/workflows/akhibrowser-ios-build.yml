@@ -110,6 +110,50 @@ jobs:
           grep -E "Test Case|Executed|TEST (SUCCEEDED|FAILED)" "$OUT/tests.log" | tail -n 40
           exit $result
 
+      - name: Launch check
+        run: |
+          app=$(find "$DERIVED/Build/Products" -path "*iphonesimulator/Client.app" -maxdepth 3 | head -n 1)
+          id=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$app/Info.plist")
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl install "$UDID" "$app"
+          touch "$RUNNER_TEMP/launched"
+          xcrun simctl launch "$UDID" "$id"
+          sleep 25
+          if xcrun simctl spawn "$UDID" launchctl list | grep -q "UIKitApplication:$id"; then
+            echo "$id still runs after 25 seconds"
+            xcrun simctl terminate "$UDID" "$id" || true
+            exit 0
+          fi
+          echo "::error::$id stopped within 25 seconds of its start"
+          mkdir -p "$OUT/crash"
+          find ~/Library/Logs/DiagnosticReports -name "*.ips" -newer "$RUNNER_TEMP/launched" -exec cp {} "$OUT/crash/" \; 2>/dev/null
+          for report in "$OUT"/crash/*.ips; do
+            [ -f "$report" ] || continue
+            echo "== $(basename "$report")"
+            python3 - "$report" <<'PY'
+          import json, sys
+          text = open(sys.argv[1]).read()
+          header, _, body = text.partition("\n")
+          crash = json.loads(body)
+          print("process:", crash.get("procName"), "| exception:", json.dumps(crash.get("exception")))
+          print("termination:", json.dumps(crash.get("termination"))[:600])
+          for key in ("asi", "lastExceptionBacktrace"):
+              if key in crash:
+                  print(key + ":", json.dumps(crash[key])[:1500])
+          images = crash.get("usedImages", [])
+          thread = next((t for t in crash.get("threads", []) if t.get("triggered")), None)
+          for frame in (thread or {}).get("frames", [])[:30]:
+              image = images[frame["imageIndex"]].get("name", "?") if frame.get("imageIndex", -1) < len(images) else "?"
+              print("  ", image, frame.get("symbol", hex(frame.get("imageOffset", 0))))
+          PY
+          done
+          xcrun simctl spawn "$UDID" log show --last 2m --style compact \
+            --predicate 'process == "Client" AND (messageType == error OR messageType == fault OR eventMessage CONTAINS[c] "fatal")' \
+            > "$OUT/app-log.txt" 2>&1 || true
+          tail -n 60 "$OUT/app-log.txt"
+          exit 1
+
       - name: Screenshots
         continue-on-error: true
         run: |
