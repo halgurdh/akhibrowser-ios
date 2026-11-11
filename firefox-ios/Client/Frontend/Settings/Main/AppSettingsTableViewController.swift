@@ -8,6 +8,7 @@ import Shared
 import Glean
 import SwiftUI
 import AkhiKit
+import AkhiPremiumKit
 
 import struct MozillaAppServices.VisitObservation
 
