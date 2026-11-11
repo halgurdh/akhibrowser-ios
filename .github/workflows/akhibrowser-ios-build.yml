@@ -114,11 +114,19 @@ jobs:
         run: |
           app=$(find "$DERIVED/Build/Products" -path "*iphonesimulator/Client.app" -maxdepth 3 | head -n 1)
           id=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$app/Info.plist")
-          xcrun simctl boot "$UDID" || true
+          # the tests leave the simulator shutting down: start it afresh and wait until it has booted
+          xcrun simctl shutdown "$UDID" 2>/dev/null || true
+          sleep 5
+          xcrun simctl boot "$UDID"
           xcrun simctl bootstatus "$UDID" -b
+          sleep 10
           xcrun simctl install "$UDID" "$app"
           touch "$RUNNER_TEMP/launched"
-          xcrun simctl launch "$UDID" "$id"
+          for attempt in 1 2 3; do
+            xcrun simctl launch "$UDID" "$id" && break
+            echo "Launch refused (attempt $attempt), retrying"
+            sleep 15
+          done
           sleep 25
           if xcrun simctl spawn "$UDID" launchctl list | grep -q "UIKitApplication:$id"; then
             echo "$id still runs after 25 seconds"
@@ -158,15 +166,13 @@ jobs:
         continue-on-error: true
         run: |
           app=$(find "$DERIVED/Build/Products" -path "*iphonesimulator/Client.app" -maxdepth 3 | head -n 1)
-          xcrun simctl boot "$UDID" || true
           xcrun simctl bootstatus "$UDID" -b
-          xcrun simctl install "$UDID" "$app"
           id=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$app/Info.plist")
           echo "Bundle id: $id"
           shot() { sleep "$2"; xcrun simctl io "$UDID" screenshot "$OUT/$1.png"; }
           xcrun simctl launch "$UDID" "$id"
           shot 1-first-start 20
-          xcrun simctl terminate "$UDID" "$id"
+          xcrun simctl terminate "$UDID" "$id" || true
           xcrun simctl launch "$UDID" "$id" FIREFOX_TEST FIREFOX_SKIP_INTRO FIREFOX_SKIP_WHATS_NEW \
             FIREFOX_SKIP_ETP_COVER_SHEET FIREFOX_SKIP_CONTEXTUAL_HINTS FIREFOX_SKIP_TERMS_OF_USE \
             SKIP_DEFAULT_BROWSER_ONBOARDING
