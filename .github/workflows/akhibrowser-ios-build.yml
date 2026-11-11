@@ -54,10 +54,18 @@ jobs:
         working-directory: firefox-ios
         run: |
           xcodebuild -resolvePackageDependencies -onlyUsePackageVersionsFromResolvedFile > "$OUT/resolve.log" 2>&1
-          xcodebuild build-for-testing -project Client.xcodeproj -scheme Firefox -configuration Debug \
+          xcodebuild build-for-testing -project Client.xcodeproj -scheme Firefox -configuration Firefox \
             -destination "id=$UDID" -derivedDataPath "$DERIVED" -skipMacroValidation \
-            COMPILER_INDEX_STORE_ENABLE=NO CODE_SIGN_IDENTITY= CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO ENABLE_TESTABILITY=YES CODE_SIGN_IDENTITY= CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
             > "$OUT/build.log" 2>&1 || { grep -E "error:|BUILD FAILED" "$OUT/build.log" | head -n 60; exit 1; }
+
+      - name: Check that the app is AkhiBrowser
+        run: |
+          app=$(find "$DERIVED/Build/Products" -path "*iphonesimulator/Client.app" -maxdepth 3 | head -n 1)
+          id=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$app/Info.plist")
+          name=$(/usr/libexec/PlistBuddy -c "Print CFBundleDisplayName" "$app/Info.plist" 2>/dev/null || true)
+          echo "$id $name"
+          [ "$id" = "org.akhibrowser.ios" ] || { echo "::error::Built $id, not AkhiBrowser (org.akhibrowser.ios)"; exit 1; }
 
       - name: AkhiKit tests
         if: hashFiles('akhi-extension/ios/Package.swift') != ''
@@ -84,7 +92,7 @@ jobs:
                   target["skippedTests"].remove("ContentBlockerTests")
           json.dump(plan, open(path, "w"), indent=2)
           EOF
-          xcodebuild test-without-building -project Client.xcodeproj -scheme Firefox -testPlan UnitTest \
+          xcodebuild test-without-building -project Client.xcodeproj -scheme Firefox -configuration Firefox -testPlan UnitTest \
             -destination "id=$UDID" -derivedDataPath "$DERIVED" -only-testing:ClientTests/ContentBlockerTests \
             -resultBundlePath "$OUT/ContentBlockerTests.xcresult" > "$OUT/tests.log" 2>&1
           result=$?
