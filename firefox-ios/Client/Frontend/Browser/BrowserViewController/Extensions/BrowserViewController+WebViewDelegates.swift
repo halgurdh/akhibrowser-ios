@@ -717,6 +717,12 @@ extension BrowserViewController: WKNavigationDelegate {
                     }
                     switch decision {
                     case .allow:
+                        // Apple Maps on the web refuses the iPhone: it gets the desktop site, as on an iPad (AkhiKit)
+                        if AkhiDesktopSites.adjust(webView, for: url, desktopUserAgent: UserAgent.desktopUserAgent()) {
+                            decisionHandler(.cancel)
+                            webView.load(navigationAction.request)
+                            return
+                        }
                         self.handleWebURLNavigation(
                             webView: webView,
                             url: url,

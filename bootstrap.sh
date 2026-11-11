@@ -40,6 +40,9 @@ if [[ "$PRODUCT" == "firefox" ]]; then
 
     # AkhiKit, the protections of AkhiBrowser, from the private akhi-extension submodule
     git submodule update --init akhi-extension
+    # The Premium and Family features of the pages, from the private akhi-premium submodule: without access to it, the
+    # app is built without them
+    git submodule update --init akhi-premium || echo "No access to akhi-premium: the app is built without Premium features"
     sh ./akhi-extension/ios/sync_resources.sh
     
 elif [[ "$PRODUCT" == "focus" ]]; then
