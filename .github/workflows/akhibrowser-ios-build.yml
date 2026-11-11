@@ -56,7 +56,7 @@ jobs:
           xcodebuild -resolvePackageDependencies -onlyUsePackageVersionsFromResolvedFile > "$OUT/resolve.log" 2>&1
           xcodebuild build-for-testing -project Client.xcodeproj -scheme Firefox -configuration Firefox \
             -destination "id=$UDID" -derivedDataPath "$DERIVED" -skipMacroValidation \
-            COMPILER_INDEX_STORE_ENABLE=NO ENABLE_TESTABILITY=YES \
+            COMPILER_INDEX_STORE_ENABLE=NO ENABLE_TESTABILITY=YES ONLY_ACTIVE_ARCH=YES \
             CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER= \
             CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=YES \
             > "$OUT/build.log" 2>&1 || { grep -E "error:|BUILD FAILED" "$OUT/build.log" | head -n 60; exit 1; }
@@ -150,6 +150,7 @@ jobs:
           crash = json.loads(body)
           print("process:", crash.get("procName"), "| exception:", json.dumps(crash.get("exception")))
           print("termination:", json.dumps(crash.get("termination"))[:600])
+          print("vmRegionInfo:", crash.get("vmRegionInfo", "")[:800])
           for key in ("asi", "lastExceptionBacktrace"):
               if key in crash:
                   print(key + ":", json.dumps(crash[key])[:1500])
@@ -160,6 +161,14 @@ jobs:
               print("  ", image, frame.get("symbol", hex(frame.get("imageOffset", 0))))
           PY
           done
+          echo "== kernel code signing messages"
+          log show --last 3m --style compact --predicate 'eventMessage CONTAINS[c] "code signing" OR eventMessage CONTAINS[c] "codesign" OR eventMessage CONTAINS[c] "cs_invalid"' 2>/dev/null | grep -v "^Timestamp" | tail -n 30 || true
+          echo "== every Mach-O file of the app"
+          find "$app" -type f | while read -r file; do
+            file "$file" | grep -q "Mach-O" || continue
+            result=$(codesign --verify --strict "$file" 2>&1 && echo valid)
+            echo "${file#$app/}: $(echo "$result" | tail -n 1) | $(codesign -dv "$file" 2>&1 | grep -E "^(Signature|TeamIdentifier|CodeDirectory)" | tr '\n' ' ')"
+          done | head -n 60
           xcrun simctl spawn "$UDID" log show --last 2m --style compact \
             --predicate 'process == "Client" AND (messageType == error OR messageType == fault OR eventMessage CONTAINS[c] "fatal")' \
             > "$OUT/app-log.txt" 2>&1 || true
