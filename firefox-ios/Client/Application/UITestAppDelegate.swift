@@ -7,6 +7,9 @@ import Foundation
 import Shared
 import Kingfisher
 import WebKit
+#if DEBUG
+import AkhiPremiumKit
+#endif
 
 import class MozillaAppServices.HardcodedNimbusFeatures
 
@@ -121,9 +124,25 @@ class UITestAppDelegate: AppDelegate {
             UserDefaults.standard.set(nil, forKey: "\(GleanPlumbMessageStore.rootKey)\(microsurveyID)")
         }
 
+        #if DEBUG
+        configureAkhiPremium(launchArguments)
+        #endif
+
         self.profile = profile
         return profile
     }
+
+    #if DEBUG
+    /// AKHI_UITEST_FAMILY unlocks the Family plan, AKHI_UITEST_FEATURES turns on the riba warning and the profanity mask.
+    private func configureAkhiPremium(_ launchArguments: [String]) {
+        if launchArguments.contains("AKHI_UITEST_FAMILY") {
+            AkhiPremium.shared.setTestPlan("family")
+        }
+        if launchArguments.contains("AKHI_UITEST_FEATURES") {
+            AkhiPageScripts.shared.set(["ribaWarning": true, "profanityMask": true])
+        }
+    }
+    #endif
 
     private func configureWebserverPort(_ arg: String) {
         let portString = arg.replacingOccurrences(of: LaunchArguments.ServerPort, with: "")

@@ -205,17 +205,6 @@ jobs:
             FIREFOX_SKIP_ETP_COVER_SHEET FIREFOX_SKIP_CONTEXTUAL_HINTS FIREFOX_SKIP_TERMS_OF_USE \
             SKIP_DEFAULT_BROWSER_ONBOARDING
           shot 2-home 15
-          open_url() { xcrun simctl openurl "$UDID" "firefox://open-url?url=$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$1")"; }
-          open_url "https://www.wikipedia.org/"
-          shot 3-ordinary-site 12
-          open_url "https://www.pornhub.com/"
-          sleep 12
-          xcrun simctl spawn "$UDID" log show --last 20s --style compact \
-            --predicate 'process == "Client" AND eventMessage BEGINSWITH "AkhiKit "' 2>/dev/null | tail -n 15 || true
-          open_url "https://www.google.com/search?q=test"
-          shot 5-google-safesearch 12
-          open_url "https://www.bing.com/search?q=test"
-          shot 6-bing-safesearch 12
 
       - name: Package the app
         if: always()
@@ -245,4 +234,68 @@ jobs:
         with:
           name: akhibrowser-ios-${{ github.run_number }}
           path: out
+          retention-days: 1
+
+  # A debug build (Fennec) with UI tests: the address bar's pages blocked, rewritten and with SafeSearch, and the
+  # Family plan unlocked by UITestAppDelegate (debug builds only) to see the riba warning in a page.
+  ui-tests:
+    runs-on: macos-26
+    timeout-minutes: 150
+    env:
+      DERIVED: ${{ github.workspace }}/DerivedData
+      OUT: ${{ github.workspace }}/out
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.AKHI_SUBMODULES_TOKEN || github.token }}
+          persist-credentials: false
+
+      - name: Select the newest Xcode
+        run: |
+          xcode=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | sort -V | tail -n 1)
+          xcode=${xcode:-$(ls -d /Applications/Xcode_*.app | sort -V | tail -n 1)}
+          sudo xcode-select -s "$xcode/Contents/Developer"
+          mkdir -p "$OUT"
+
+      - name: Bootstrap
+        run: sh ./bootstrap.sh firefox > "$OUT/bootstrap.log" 2>&1 || { tail -n 40 "$OUT/bootstrap.log"; exit 1; }
+
+      - name: Pick a simulator
+        run: |
+          udid=$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          devices = json.load(sys.stdin)["devices"]
+          runtimes = sorted((r for r in devices if "iOS" in r), key=lambda r: [int(x) for x in r.rsplit("iOS-", 1)[1].split("-")])
+          print(next(d["udid"] for r in reversed(runtimes) for d in devices[r] if d["name"].startswith("iPhone")))')
+          echo "UDID=$udid" >> "$GITHUB_ENV"
+
+      - name: Build for the UI tests
+        working-directory: firefox-ios
+        run: |
+          xcodebuild -resolvePackageDependencies -onlyUsePackageVersionsFromResolvedFile > "$OUT/resolve.log" 2>&1
+          xcodebuild build-for-testing -project Client.xcodeproj -scheme Fennec -testPlan Smoketest \
+            -destination "id=$UDID" -derivedDataPath "$DERIVED" -skipMacroValidation \
+            COMPILER_INDEX_STORE_ENABLE=NO ONLY_ACTIVE_ARCH=YES \
+            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER= \
+            CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=YES \
+            > "$OUT/ui-build.log" 2>&1 || { grep -E "error:|BUILD FAILED" "$OUT/ui-build.log" | head -n 60; exit 1; }
+
+      - name: Blocking, SafeSearch and Family UI tests
+        working-directory: firefox-ios
+        run: |
+          xcodebuild test-without-building -project Client.xcodeproj -scheme Fennec -testPlan Smoketest \
+            -destination "id=$UDID" -derivedDataPath "$DERIVED" \
+            -only-testing:XCUITests/AkhiProtectionTests -only-testing:XCUITests/AkhiFamilyTests \
+            -retry-tests-on-failure -test-iterations 2 \
+            > "$OUT/ui-tests.log" 2>&1
+          result=$?
+          grep -E "Test Case .*(passed|failed)|error:|Executed|TEST (SUCCEEDED|FAILED|EXECUTE FAILED)" "$OUT/ui-tests.log" | tail -n 60
+          exit $result
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: akhibrowser-ios-ui-tests-${{ github.run_number }}
+          path: out/*.log
           retention-days: 1
