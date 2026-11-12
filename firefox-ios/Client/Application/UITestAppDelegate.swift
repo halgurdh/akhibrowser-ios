@@ -151,13 +151,14 @@ class UITestAppDelegate: AppDelegate {
         state.isUserInteractionEnabled = false
         state.isAccessibilityElement = true
         state.accessibilityIdentifier = "AkhiUITestState"
-        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-            MainActor.assumeIsolated {
+        Task { @MainActor in
+            while true {
                 if state.superview == nil, let window = UIWindow.keyWindow {
                     window.addSubview(state)
                 }
                 state.superview?.bringSubviewToFront(state)
                 state.accessibilityLabel = AkhiPageScripts.testLines.suffix(8).joined(separator: " | ")
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
             }
         }
     }
