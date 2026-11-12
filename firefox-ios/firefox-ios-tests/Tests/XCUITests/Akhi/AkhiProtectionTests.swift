@@ -83,7 +83,6 @@ class AkhiProtectionTests: BaseTestCase {
         for _ in 1...3 {
             selectors.ADDRESS_BAR.element(in: app).press(forDuration: 1.5)
             if copyAddress.waitForExistence(timeout: 5) { break }
-            app.tap()
             sleep(2)
         }
         copyAddress.waitAndTap()
