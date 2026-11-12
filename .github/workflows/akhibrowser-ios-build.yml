@@ -357,3 +357,32 @@ jobs:
           name: akhibrowser-ios-ui-tests-${{ github.run_number }}
           path: out/*.log
           retention-days: 1
+
+  # Only the drafts of this run stay in akhi-extension: the older iOS builds and UI test screenshots go, with the
+  # replaced desktop drafts (macos-build-6 held a screenshot of an adult site), and the merged premium branches.
+  cleanup:
+    needs: [build, ui-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.AKHI_SUBMODULES_TOKEN }}
+    steps:
+      - name: Remove old drafts and merged branches
+        run: |
+          [ -n "$GH_TOKEN" ] || exit 0
+          run=${{ github.run_number }}
+          gh api "repos/halgurdh/akhi-extension/releases?per_page=100" --paginate \
+            -q '.[] | select(.draft) | .tag_name' > drafts.txt
+          while read -r tag; do
+            case "$tag" in
+              ios-build-$run|ios-uitests-$run) continue ;;
+              ios-build-*|ios-uitests-*|macos-build-6|linux-build-4) ;;
+              *) continue ;;
+            esac
+            echo "Removing $tag"
+            gh release delete "$tag" --repo halgurdh/akhi-extension --yes || true
+          done < drafts.txt
+          for branch in claude/ios-ui-test-plan ios-premiumkit; do
+            gh api -X DELETE "repos/halgurdh/akhibrowser-premium/git/refs/heads/$branch" 2>/dev/null \
+              && echo "Removed akhibrowser-premium $branch" || true
+          done
