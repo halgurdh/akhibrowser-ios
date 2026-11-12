@@ -284,13 +284,16 @@ jobs:
       - name: Blocking, SafeSearch and Family UI tests
         working-directory: firefox-ios
         run: |
+          set +e
           xcodebuild test-without-building -project Client.xcodeproj -scheme Fennec -testPlan Smoketest \
             -destination "id=$UDID" -derivedDataPath "$DERIVED" \
             -only-testing:XCUITests/AkhiProtectionTests -only-testing:XCUITests/AkhiFamilyTests \
             -retry-tests-on-failure -test-iterations 2 \
             > "$OUT/ui-tests.log" 2>&1
           result=$?
-          grep -E "Test Case .*(passed|failed)|error:|Executed|TEST (SUCCEEDED|FAILED|EXECUTE FAILED)" "$OUT/ui-tests.log" | tail -n 60
+          grep -E "Test Case .*(passed|failed)|error:|Executed|TEST (SUCCEEDED|FAILED|EXECUTE FAILED)|Testing failed|xcodebuild: error" \
+            "$OUT/ui-tests.log" | tail -n 80
+          [ $result -eq 0 ] || tail -n 40 "$OUT/ui-tests.log"
           exit $result
 
       - uses: actions/upload-artifact@v4
