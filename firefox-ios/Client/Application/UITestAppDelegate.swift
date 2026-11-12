@@ -137,6 +137,13 @@ class UITestAppDelegate: AppDelegate {
         if launchArguments.contains("AKHI_UITEST_FEATURES") {
             AkhiPageScripts.shared.set(["ribaWarning": true, "profanityMask": true])
         }
+        NSLog(
+            "AkhiUITest family=%@ premium=%@ scripts=%@ ribaWarning=%@",
+            "\(AkhiPremium.shared.isFamily)",
+            "\(AkhiPremium.shared.isActive)",
+            "\(AkhiPageScripts.shared.hasPremiumScripts)",
+            "\(AkhiPageScripts.shared.bool("ribaWarning"))"
+        )
     }
     #endif
 
@@ -315,6 +322,8 @@ class UITestAppDelegate: AppDelegate {
         loadExperiment()
         #if DEBUG
         configureAkhiPremium(ProcessInfo.processInfo.arguments)
+        #else
+        NSLog("AkhiUITest: not a debug build, no Family unlock")
         #endif
 
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)

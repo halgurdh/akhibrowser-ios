@@ -296,6 +296,13 @@ jobs:
           [ $result -eq 0 ] || tail -n 40 "$OUT/ui-tests.log"
           exit $result
 
+      - name: AkhiBrowser's messages during the UI tests
+        if: always()
+        run: |
+          xcrun simctl spawn "$UDID" log show --last 60m --style compact \
+            --predicate 'eventMessage CONTAINS "AkhiUITest" OR eventMessage BEGINSWITH "AkhiPageScripts" OR eventMessage CONTAINS "page scripts are missing" OR eventMessage CONTAINS "page shim"' \
+            2>/dev/null | grep -v "^Timestamp" | tail -n 60 || true
+
       - name: Crashes of the app during the UI tests
         if: always()
         run: |
