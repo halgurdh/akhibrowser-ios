@@ -185,7 +185,7 @@ final class HomePageSettingViewController: SettingsTableViewController,
                 prefs: profile.prefs,
                 theme: currentTheme(),
                 prefKey: PrefsKeys.UserFeatureFlagPrefs.ASPocketStories,
-                defaultValue: true,
+                defaultValue: false,
                 titleText: .Settings.Homepage.CustomizeFirefoxHome.Stories
             ) { [windowUUID] value in
                 store.dispatch(

@@ -52,13 +52,6 @@ struct TermsOfServiceManager: FeatureFlaggable, Sendable {
             AppName.shortName.rawValue,
             privacyNoticeLink
         )
-        let manageLink = String.Onboarding.TermsOfService.ManageLink
-        let manageAgreement = String(
-            format: String.Onboarding.Modern.TermsOfService.ManagePreferenceAgreement,
-            AppName.shortName.rawValue,
-            MozillaName.shortName.rawValue,
-            manageLink
-        )
 
         return OnboardingKitCardInfoModel(
             cardType: .basic,
@@ -82,12 +75,6 @@ struct TermsOfServiceManager: FeatureFlaggable, Sendable {
                     linkText: privacyNoticeLink,
                     action: .openPrivacyNotice,
                     accessibilityIdentifier: AccessibilityIdentifiers.TermsOfService.privacyNoticeAgreement
-                ),
-                EmbeddedLink(
-                    fullText: manageAgreement,
-                    linkText: manageLink,
-                    action: .openManageSettings,
-                    accessibilityIdentifier: AccessibilityIdentifiers.TermsOfService.manageDataCollectionAgreement
                 )
             ]
         )

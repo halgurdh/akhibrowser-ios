@@ -17,6 +17,7 @@ final class TopSitesManagerTests: XCTestCase {
     override func setUp() async throws {
         try await super.setUp()
         profile = makeProfile()
+        profile.prefs.setBool(true, forKey: PrefsKeys.FeatureFlags.SponsoredShortcuts)
         mockNotificationCenter = MockNotificationCenter()
         DependencyHelperMock().bootstrapDependencies(injectedProfile: profile)
     }
@@ -388,7 +389,9 @@ final class TopSitesManagerTests: XCTestCase {
         XCTAssertEqual(mockPinnedSites.addPinnedTopSiteCalledCount, 1)
     }
 
-    func test_sponsoredShortcutsFlagEnabled_withoutUserPref_returnsSponsoredSites() throws {
+    func test_sponsoredShortcuts_withoutUserPref_returnsNoSponsoredSites() throws {
+        profile?.prefs.removeObjectForKey(PrefsKeys.FeatureFlags.SponsoredShortcuts)
+
         let subject = try createSubject()
 
         let topSites = subject.recalculateTopSites(
@@ -396,7 +399,7 @@ final class TopSitesManagerTests: XCTestCase {
             sponsoredSites: createSponsoredSites()
         )
 
-        XCTAssertEqual(topSites.count, 2)
+        XCTAssertEqual(topSites.count, 0)
     }
 
     func test_sponsoredShortcutsFlagEnabled_withUserPref_returnsNoSponsoredSites() throws {

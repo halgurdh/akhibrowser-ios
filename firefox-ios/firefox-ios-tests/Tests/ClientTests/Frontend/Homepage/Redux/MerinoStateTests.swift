@@ -11,12 +11,20 @@ import XCTest
 final class MerinoStateTests: XCTestCase {
     override func setUp() async throws {
         try await super.setUp()
-        await DependencyHelperMock().bootstrapDependencies(injectedProfile: makeProfile())
+        let profile = makeProfile()
+        profile.prefs.setBool(true, forKey: PrefsKeys.UserFeatureFlagPrefs.ASPocketStories)
+        await DependencyHelperMock().bootstrapDependencies(injectedProfile: profile)
     }
 
     override func tearDown() async throws {
         DependencyHelperMock().reset()
         try await super.tearDown()
+    }
+
+    func test_initialState_withoutStoriesPref_hidesSection() {
+        let state = MerinoState(profile: makeProfile(), windowUUID: .XCTestDefaultUUID)
+
+        XCTAssertFalse(state.shouldShowSection)
     }
 
     func test_initialState_returnsExpectedState() {

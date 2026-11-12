@@ -50,7 +50,7 @@ final class AppLaunchUtil: FeatureFlaggable, Sendable {
         }
 
         // Need to get "settings.sendCrashReports" this way so that Sentry can be initialized before getting the Profile.
-        let sendCrashReports = NSUserDefaultsPrefs(prefix: "profile").boolForKey(AppConstants.prefSendCrashReports) ?? true
+        let sendCrashReports = NSUserDefaultsPrefs(prefix: "profile").boolForKey(AppConstants.prefSendCrashReports) ?? false
 
         // Telemetry can start when ToS are disabled, accepted, or skipped for an existing installation.
         let canInitializeTelemetry = !termsOfServiceManager.isFeatureEnabled

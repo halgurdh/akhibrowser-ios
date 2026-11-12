@@ -39,7 +39,7 @@ struct MainMenuConfigurationUtility: Equatable, FeatureFlaggable {
     }
 
     private var canSendTechnicalData: Bool {
-        return profile.prefs.boolForKey(AppConstants.prefSendUsageData) ?? true
+        return profile.prefs.boolForKey(AppConstants.prefSendUsageData) ?? false
     }
 
     private var isSummarizerOn: Bool {

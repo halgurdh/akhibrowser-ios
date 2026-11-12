@@ -46,7 +46,7 @@ class StudiesToggleSetting: BoolSetting {
 
         setupSettingDidChange()
 
-        let sendUsageDataPref = prefs.boolForKey(AppConstants.prefSendUsageData) ?? true
+        let sendUsageDataPref = prefs.boolForKey(AppConstants.prefSendUsageData) ?? false
 
         // Special Case (EXP-4780, FXIOS-10534) disable studies if usage data is disabled
         // and studies should be toggled back on after re-enabling Telemetry
@@ -69,7 +69,7 @@ class StudiesToggleSetting: BoolSetting {
         // Set experiments study setting based on usage enabled state
         // Special Case (EXP-4780, FXIOS-10534) disable Studies if usage data is disabled
         // and studies should be toggled back on after re-enabling Telemetry
-        let studiesEnabled = isUsageEnabled && (prefs?.boolForKey(AppConstants.prefStudiesToggle) ?? true)
+        let studiesEnabled = isUsageEnabled && (prefs?.boolForKey(AppConstants.prefStudiesToggle) ?? false)
         Experiments.setStudiesSetting(studiesEnabled)
     }
 

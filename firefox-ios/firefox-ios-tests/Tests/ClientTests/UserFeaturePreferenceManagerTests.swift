@@ -63,6 +63,13 @@ final class UserFeaturePreferenceManagerTests: XCTestCase {
     }
 
     @MainActor
+    func testSponsoredShortcuts_defaultsToFalse_whenNoUserPrefSet() {
+        let subject = createSubject(prefs: prefs, backendLayer: mockLayer, userInterfaceIdiom: .phone)
+
+        XCTAssertFalse(subject.getPreferenceFor(.hntSponsoredShortcuts))
+    }
+
+    @MainActor
     func testSponsoredShortcuts_readsUserPref() {
         let subject = createSubject(prefs: prefs, backendLayer: mockLayer, userInterfaceIdiom: .phone)
 

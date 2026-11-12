@@ -36,7 +36,7 @@ struct MerinoState: StateType, Equatable {
     }
 
     init(profile: Profile = AppContainer.shared.resolve(), windowUUID: WindowUUID) {
-        let userPrefs = profile.prefs.boolForKey(PrefsKeys.UserFeatureFlagPrefs.ASPocketStories) ?? true
+        let userPrefs = profile.prefs.boolForKey(PrefsKeys.UserFeatureFlagPrefs.ASPocketStories) ?? false
         let isLocaleSupported = MerinoProvider.isLocaleSupported(Locale.current.identifier)
         let shouldShowSection = userPrefs && isLocaleSupported
 
