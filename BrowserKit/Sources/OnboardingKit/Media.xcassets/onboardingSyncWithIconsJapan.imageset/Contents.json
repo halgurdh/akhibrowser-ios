@@ -1,15 +1,23 @@
 {
-  "images" : [
+  "images": [
     {
-      "filename" : "onboardingSyncWithIconsJapan.pdf",
-      "idiom" : "universal"
+      "filename": "akhiOnboarding.png",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "filename": "akhiOnboarding@2x.png",
+      "idiom": "universal",
+      "scale": "2x"
+    },
+    {
+      "filename": "akhiOnboarding@3x.png",
+      "idiom": "universal",
+      "scale": "3x"
     }
   ],
-  "info" : {
-    "author" : "xcode",
-    "version" : 1
-  },
-  "properties" : {
-    "preserves-vector-representation" : true
+  "info": {
+    "author": "xcode",
+    "version": 1
   }
 }
