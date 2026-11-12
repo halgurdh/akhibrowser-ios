@@ -78,8 +78,15 @@ class AkhiProtectionTests: BaseTestCase {
         waitUntilPageLoad(timeout: 30)
         XCTAssertFalse(app.alerts[Self.blockedTitle].exists, "\(url) was blocked", file: file, line: line)
         UIPasteboard.general.string = "nothing-copied"
-        browserScreen.longPressAddressBar()
-        browserScreen.tapContextMenuCopyAddress()
+        // the address bar's menu sometimes doesn't open while the page still settles
+        let copyAddress = selectors.CONTEXT_MENU_COPY_ADDRESS.element(in: app)
+        for _ in 1...3 {
+            selectors.ADDRESS_BAR.element(in: app).press(forDuration: 1.5)
+            if copyAddress.waitForExistence(timeout: 5) { break }
+            app.tap()
+            sleep(2)
+        }
+        copyAddress.waitAndTap()
 
         browserScreen.tapOnAddressBar()
         selectors.CLEAR_TEXT_BUTTON.element(in: app).tapIfExists()
