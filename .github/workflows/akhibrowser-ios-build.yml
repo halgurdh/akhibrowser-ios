@@ -288,7 +288,7 @@ jobs:
           xcodebuild test-without-building -project Client.xcodeproj -scheme Fennec -testPlan Smoketest \
             -destination "id=$UDID" -derivedDataPath "$DERIVED" \
             -only-testing:XCUITests/AkhiProtectionTests -only-testing:XCUITests/AkhiFamilyTests \
-            -retry-tests-on-failure -test-iterations 2 \
+            -retry-tests-on-failure -test-iterations 2 -parallel-testing-enabled NO \
             > "$OUT/ui-tests.log" 2>&1
           result=$?
           grep -E "Test Case .*(passed|failed)|error:|Executed|TEST (SUCCEEDED|FAILED|EXECUTE FAILED)|Testing failed|xcodebuild: error" \
