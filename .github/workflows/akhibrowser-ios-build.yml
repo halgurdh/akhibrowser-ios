@@ -299,9 +299,8 @@ jobs:
       - name: AkhiBrowser's messages during the UI tests
         if: always()
         run: |
-          xcrun simctl spawn "$UDID" log show --last 60m --style compact \
-            --predicate 'eventMessage CONTAINS "AkhiUITest" OR eventMessage BEGINSWITH "AkhiPageScripts" OR eventMessage CONTAINS "page scripts are missing" OR eventMessage CONTAINS "page shim"' \
-            2>/dev/null | grep -v "^Timestamp" | tail -n 60 || true
+          container=$(xcrun simctl get_app_container "$UDID" org.mozilla.ios.Fennec data 2>/dev/null) || exit 0
+          tail -n 60 "$container/Library/akhi-uitest.log" 2>/dev/null || echo "No akhi-uitest.log in $container"
 
       - name: Crashes of the app during the UI tests
         if: always()

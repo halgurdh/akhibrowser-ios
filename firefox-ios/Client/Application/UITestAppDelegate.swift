@@ -137,12 +137,9 @@ class UITestAppDelegate: AppDelegate {
         if launchArguments.contains("AKHI_UITEST_FEATURES") {
             AkhiPageScripts.shared.set(["ribaWarning": true, "profanityMask": true])
         }
-        NSLog(
-            "AkhiUITest family=%@ premium=%@ scripts=%@ ribaWarning=%@",
-            "\(AkhiPremium.shared.isFamily)",
-            "\(AkhiPremium.shared.isActive)",
-            "\(AkhiPageScripts.shared.hasPremiumScripts)",
-            "\(AkhiPageScripts.shared.bool("ribaWarning"))"
+        AkhiPageScripts.appendTestLog(
+            "launch family=\(AkhiPremium.shared.isFamily) premium=\(AkhiPremium.shared.isActive) " +
+            "scripts=\(AkhiPageScripts.shared.hasPremiumScripts) ribaWarning=\(AkhiPageScripts.shared.bool("ribaWarning"))"
         )
     }
     #endif
