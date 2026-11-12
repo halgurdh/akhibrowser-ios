@@ -8,8 +8,8 @@ import XCTest
 class AkhiFamilyTests: BaseTestCase {
     static let ribaTitle = "This may involve riba (interest)"
     static let ribaText = NSPredicate(format: "label CONTAINS[c] %@ OR value CONTAINS[c] %@", "riba (interest)", "riba (interest)")
-    /// The riba warning knows a loan page by the words of its address, so the app's own test server is enough.
-    static let loanPage = "http://localhost:\(serverPort)/test-fixture/personal-loans"
+    /// The riba warning knows a mortgage page by the words of its address.
+    static let loanPage = "https://en.wikipedia.org/wiki/Mortgage_loan"
 
     private var browserScreen: BrowserScreen!
 
