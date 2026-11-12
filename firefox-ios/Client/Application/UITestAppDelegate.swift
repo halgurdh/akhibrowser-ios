@@ -7,7 +7,7 @@ import Foundation
 import Shared
 import Kingfisher
 import WebKit
-#if DEBUG
+#if MOZ_CHANNEL_developer
 import AkhiPremiumKit
 #endif
 
@@ -128,7 +128,7 @@ class UITestAppDelegate: AppDelegate {
         return profile
     }
 
-    #if DEBUG
+    #if MOZ_CHANNEL_developer
     /// AKHI_UITEST_FAMILY unlocks the Family plan, AKHI_UITEST_FEATURES turns on the riba warning and the profanity mask.
     private func configureAkhiPremium(_ launchArguments: [String]) {
         if launchArguments.contains("AKHI_UITEST_FAMILY") {
@@ -337,10 +337,8 @@ class UITestAppDelegate: AppDelegate {
         defer { UIWindow.keyWindow?.layer.speed = 100.0 }
 
         loadExperiment()
-        #if DEBUG
+        #if MOZ_CHANNEL_developer
         configureAkhiPremium(ProcessInfo.processInfo.arguments)
-        #else
-        NSLog("AkhiUITest: not a debug build, no Family unlock")
         #endif
 
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)

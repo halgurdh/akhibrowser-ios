@@ -3,7 +3,7 @@
 
 import XCTest
 
-/// The Family plan in a debug build: UITestAppDelegate unlocks it with AKHI_UITEST_FAMILY and turns the riba warning
+/// The Family plan in a debug (Fennec, developer channel) build: UITestAppDelegate unlocks it with AKHI_UITEST_FAMILY and turns the riba warning
 /// on with AKHI_UITEST_FEATURES, so a Family feature of the pages can be seen working without a purchase.
 class AkhiFamilyTests: BaseTestCase {
     static let ribaTitle = "This may involve riba (interest)"
