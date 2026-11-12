@@ -141,6 +141,25 @@ class UITestAppDelegate: AppDelegate {
             "launch family=\(AkhiPremium.shared.isFamily) premium=\(AkhiPremium.shared.isActive) " +
             "scripts=\(AkhiPageScripts.shared.hasPremiumScripts) ribaWarning=\(AkhiPageScripts.shared.bool("ribaWarning"))"
         )
+        showAkhiTestState()
+    }
+
+    /// An element the UI tests read: AkhiPageScripts' lines for the tests, refreshed every second.
+    private func showAkhiTestState() {
+        let state = UIView(frame: CGRect(x: 0, y: 0, width: 2, height: 2))
+        state.alpha = 0.02
+        state.isUserInteractionEnabled = false
+        state.isAccessibilityElement = true
+        state.accessibilityIdentifier = "AkhiUITestState"
+        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            MainActor.assumeIsolated {
+                if state.superview == nil, let window = UIWindow.keyWindow {
+                    window.addSubview(state)
+                }
+                state.superview?.bringSubviewToFront(state)
+                state.accessibilityLabel = AkhiPageScripts.testLines.suffix(8).joined(separator: " | ")
+            }
+        }
     }
     #endif
 

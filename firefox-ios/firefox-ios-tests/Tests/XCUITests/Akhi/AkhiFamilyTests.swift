@@ -35,7 +35,10 @@ class AkhiFamilyTests: BaseTestCase {
             screenshot.lifetime = .keepAlways
             add(screenshot)
         }
-        XCTAssertTrue(shown, "No riba warning on \(Self.loanPage)")
+        let state = app.descendants(matching: .any)["AkhiUITestState"]
+        let stateText = state.exists ? state.label : "no AkhiUITestState"
+        print("AkhiFamilyTests: \(stateText)")
+        XCTAssertTrue(shown, "No riba warning on \(Self.loanPage). App: \(stateText)")
     }
 
     func testRibaWarningWithoutFamilyStaysOff() {
