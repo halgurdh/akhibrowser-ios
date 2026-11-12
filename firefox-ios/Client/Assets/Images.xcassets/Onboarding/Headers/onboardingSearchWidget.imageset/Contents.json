@@ -1,12 +1,23 @@
 {
-  "images" : [
+  "images": [
     {
-      "filename" : "onboardingSearchWidget.pdf",
-      "idiom" : "universal"
+      "filename": "akhiSearchWidget.png",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "filename": "akhiSearchWidget@2x.png",
+      "idiom": "universal",
+      "scale": "2x"
+    },
+    {
+      "filename": "akhiSearchWidget@3x.png",
+      "idiom": "universal",
+      "scale": "3x"
     }
   ],
-  "info" : {
-    "author" : "xcode",
-    "version" : 1
+  "info": {
+    "author": "xcode",
+    "version": 1
   }
 }
