@@ -296,6 +296,30 @@ jobs:
           [ $result -eq 0 ] || tail -n 40 "$OUT/ui-tests.log"
           exit $result
 
+      - name: Crashes of the app during the UI tests
+        if: always()
+        run: |
+          for report in $(find ~/Library/Logs/DiagnosticReports -name "*.ips" -newer "$DERIVED" 2>/dev/null); do
+            grep -q '"procName" *: *"Client"' "$report" || grep -q 'Fennec' "$report" || continue
+            echo "== $(basename "$report")"
+            python3 - "$report" <<'PY'
+          import json, sys
+          header, _, body = open(sys.argv[1]).read().partition("\n")
+          crash = json.loads(body)
+          print("process:", crash.get("procName"), "| exception:", json.dumps(crash.get("exception")))
+          print("termination:", json.dumps(crash.get("termination"))[:400])
+          for key in ("asi", "lastExceptionBacktrace"):
+              if key in crash:
+                  print(key + ":", json.dumps(crash[key])[:1500])
+          images = crash.get("usedImages", [])
+          thread = next((t for t in crash.get("threads", []) if t.get("triggered")), None)
+          for frame in (thread or {}).get("frames", [])[:40]:
+              index = frame.get("imageIndex", -1)
+              image = images[index].get("name", "?") if 0 <= index < len(images) else "?"
+              print("  ", image, frame.get("symbol", hex(frame.get("imageOffset", 0))), frame.get("sourceFile", ""), frame.get("sourceLine", ""))
+          PY
+          done
+
       - name: Screenshots of the Family and SafeSearch tests
         if: always()
         env:

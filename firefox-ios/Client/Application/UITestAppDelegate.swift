@@ -124,10 +124,6 @@ class UITestAppDelegate: AppDelegate {
             UserDefaults.standard.set(nil, forKey: "\(GleanPlumbMessageStore.rootKey)\(microsurveyID)")
         }
 
-        #if DEBUG
-        configureAkhiPremium(launchArguments)
-        #endif
-
         self.profile = profile
         return profile
     }
@@ -317,6 +313,9 @@ class UITestAppDelegate: AppDelegate {
         defer { UIWindow.keyWindow?.layer.speed = 100.0 }
 
         loadExperiment()
+        #if DEBUG
+        configureAkhiPremium(ProcessInfo.processInfo.arguments)
+        #endif
 
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
