@@ -8,7 +8,8 @@ import XCTest
 class AkhiFamilyTests: BaseTestCase {
     static let ribaTitle = "This may involve riba (interest)"
     static let ribaText = NSPredicate(format: "label CONTAINS[c] %@ OR value CONTAINS[c] %@", "riba (interest)", "riba (interest)")
-    static let bnplSite = "https://www.klarna.com/"
+    /// The riba warning knows a loan page by the words of its address, so the app's own test server is enough.
+    static let loanPage = "http://localhost:\(serverPort)/test-fixture/personal-loans"
 
     private var browserScreen: BrowserScreen!
 
@@ -22,19 +23,23 @@ class AkhiFamilyTests: BaseTestCase {
     }
 
     func testFamilyShowsTheRibaWarning() {
-        browserScreen.navigateToURL(Self.bnplSite)
+        browserScreen.navigateToURL(Self.loanPage)
         waitUntilPageLoad(timeout: 30)
         let notice = app.webViews.descendants(matching: .any).matching(Self.ribaText).firstMatch
         let shown = notice.waitForExistence(timeout: 30)
         if !shown {
             let texts = app.webViews.staticTexts.allElementsBoundByIndex.prefix(30).map(\.label)
             print("AkhiFamilyTests: texts of the page: \(texts)")
+            let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+            screenshot.name = "family-riba-missing"
+            screenshot.lifetime = .keepAlways
+            add(screenshot)
         }
-        XCTAssertTrue(shown, "No riba warning on \(Self.bnplSite)")
+        XCTAssertTrue(shown, "No riba warning on \(Self.loanPage)")
     }
 
     func testRibaWarningWithoutFamilyStaysOff() {
-        browserScreen.navigateToURL(Self.bnplSite)
+        browserScreen.navigateToURL(Self.loanPage)
         waitUntilPageLoad(timeout: 30)
         let notice = app.webViews.descendants(matching: .any).matching(Self.ribaText).firstMatch
         XCTAssertFalse(notice.waitForExistence(timeout: 15), "The riba warning showed without Family")

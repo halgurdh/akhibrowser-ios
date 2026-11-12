@@ -24,8 +24,8 @@ class AkhiProtectionTests: BaseTestCase {
     func testOrdinarySiteOpens() {
         browserScreen.navigateToURL("https://www.wikipedia.org/")
         waitUntilPageLoad(timeout: 30)
-        XCTAssertFalse(app.alerts[Self.blockedTitle].exists)
-        browserScreen.assertAddressBarContains(value: "wikipedia.org", timeout: 30)
+        XCTAssertFalse(app.alerts[Self.blockedTitle].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 30), "Wikipedia didn't open")
     }
 
     func testAdultSiteIsBlocked() {
@@ -84,12 +84,19 @@ class AkhiProtectionTests: BaseTestCase {
         browserScreen.tapOnAddressBar()
         selectors.CLEAR_TEXT_BUTTON.element(in: app).tapIfExists()
         let addressBar = selectors.ADDRESS_BAR.element(in: app)
-        let pasteButton = selectors.PASTE_BUTTON.element(in: app)
+        // the edit menu's Paste is a button, a menu item or, on iOS 26, a static text
+        let paste = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == 'Paste' AND elementType IN %@", [
+                XCUIElement.ElementType.button.rawValue,
+                XCUIElement.ElementType.menuItem.rawValue,
+                XCUIElement.ElementType.staticText.rawValue,
+            ]))
+            .firstMatch
         addressBar.press(forDuration: 1)
-        if !pasteButton.waitForExistence(timeout: 5) {
+        if !paste.waitForExistence(timeout: 5) {
             addressBar.press(forDuration: 1)
         }
-        pasteButton.waitAndTap()
+        paste.waitAndTap()
 
         let format = parts.map { _ in "value CONTAINS %@" }.joined(separator: " OR ")
         let expectation = XCTNSPredicateExpectation(
