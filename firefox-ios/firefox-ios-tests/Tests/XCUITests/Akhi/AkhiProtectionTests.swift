@@ -65,23 +65,38 @@ class AkhiProtectionTests: BaseTestCase {
         mozWaitForElementToNotExist(alert)
     }
 
+    /// The address of the page after a search: the bar shows a search's terms, so the address is copied from its menu
+    /// and pasted back into it as text.
     private func assertAddress(
         after url: String,
         containsAnyOf parts: [String],
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
+        let selectors = BrowserSelectors()
         browserScreen.navigateToURL(url)
         waitUntilPageLoad(timeout: 30)
         XCTAssertFalse(app.alerts[Self.blockedTitle].exists, "\(url) was blocked", file: file, line: line)
+        UIPasteboard.general.string = "nothing-copied"
+        browserScreen.longPressAddressBar()
+        browserScreen.tapContextMenuCopyAddress()
+
         browserScreen.tapOnAddressBar()
-        let addressBar = app.textFields[AccessibilityIdentifiers.Browser.AddressToolbar.searchTextField]
+        selectors.CLEAR_TEXT_BUTTON.element(in: app).tapIfExists()
+        let addressBar = selectors.ADDRESS_BAR.element(in: app)
+        let pasteButton = selectors.PASTE_BUTTON.element(in: app)
+        addressBar.press(forDuration: 1)
+        if !pasteButton.waitForExistence(timeout: 5) {
+            addressBar.press(forDuration: 1)
+        }
+        pasteButton.waitAndTap()
+
         let format = parts.map { _ in "value CONTAINS %@" }.joined(separator: " OR ")
         let expectation = XCTNSPredicateExpectation(
             predicate: NSPredicate(format: format, argumentArray: parts),
             object: addressBar
         )
-        let result = XCTWaiter().wait(for: [expectation], timeout: 30)
+        let result = XCTWaiter().wait(for: [expectation], timeout: 15)
         XCTAssertEqual(
             result,
             .completed,

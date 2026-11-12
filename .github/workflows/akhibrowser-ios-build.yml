@@ -296,6 +296,31 @@ jobs:
           [ $result -eq 0 ] || tail -n 40 "$OUT/ui-tests.log"
           exit $result
 
+      - name: Screenshots of the Family and SafeSearch tests
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.AKHI_SUBMODULES_TOKEN }}
+        run: |
+          result=$(ls -d "$DERIVED"/Logs/Test/*.xcresult 2>/dev/null | tail -n 1)
+          [ -n "$result" ] && [ -n "$GH_TOKEN" ] || exit 0
+          xcrun xcresulttool export attachments --path "$result" --output-path "$RUNNER_TEMP/attachments" || exit 0
+          # never the screenshots of the adult tests, in case a page wasn't blocked
+          python3 - "$RUNNER_TEMP/attachments" > "$RUNNER_TEMP/shots.txt" <<'PY'
+          import json, os, sys
+          folder = sys.argv[1]
+          for test in json.load(open(os.path.join(folder, "manifest.json"))):
+              name = test.get("testIdentifier", "")
+              if "AkhiFamilyTests" in name or "SafeSearch" in name or "Question" in name:
+                  for attachment in test.get("attachments", []):
+                      print(os.path.join(folder, attachment["exportedFileName"]))
+          PY
+          files=()
+          while read -r file; do [ -f "$file" ] && files+=("$file"); done < "$RUNNER_TEMP/shots.txt"
+          [ ${#files[@]} -gt 0 ] || exit 0
+          gh release create "ios-uitests-${{ github.run_number }}" "${files[@]}" \
+            --repo halgurdh/akhi-extension --draft --title "iOS UI tests ${{ github.run_number }}" \
+            --notes "Screenshots of the Family and SafeSearch UI tests, from ${{ github.sha }}"
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:

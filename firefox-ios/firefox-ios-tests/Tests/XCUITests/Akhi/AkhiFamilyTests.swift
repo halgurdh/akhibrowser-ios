@@ -7,6 +7,7 @@ import XCTest
 /// on with AKHI_UITEST_FEATURES, so a Family feature of the pages can be seen working without a purchase.
 class AkhiFamilyTests: BaseTestCase {
     static let ribaTitle = "This may involve riba (interest)"
+    static let ribaText = NSPredicate(format: "label CONTAINS[c] %@ OR value CONTAINS[c] %@", "riba (interest)", "riba (interest)")
     static let bnplSite = "https://www.klarna.com/"
 
     private var browserScreen: BrowserScreen!
@@ -23,14 +24,19 @@ class AkhiFamilyTests: BaseTestCase {
     func testFamilyShowsTheRibaWarning() {
         browserScreen.navigateToURL(Self.bnplSite)
         waitUntilPageLoad(timeout: 30)
-        let notice = app.webViews.staticTexts[Self.ribaTitle]
-        XCTAssertTrue(notice.waitForExistence(timeout: 30), "No riba warning on \(Self.bnplSite)")
+        let notice = app.webViews.descendants(matching: .any).matching(Self.ribaText).firstMatch
+        let shown = notice.waitForExistence(timeout: 30)
+        if !shown {
+            let texts = app.webViews.staticTexts.allElementsBoundByIndex.prefix(30).map(\.label)
+            print("AkhiFamilyTests: texts of the page: \(texts)")
+        }
+        XCTAssertTrue(shown, "No riba warning on \(Self.bnplSite)")
     }
 
     func testRibaWarningWithoutFamilyStaysOff() {
         browserScreen.navigateToURL(Self.bnplSite)
         waitUntilPageLoad(timeout: 30)
-        let notice = app.webViews.staticTexts[Self.ribaTitle]
+        let notice = app.webViews.descendants(matching: .any).matching(Self.ribaText).firstMatch
         XCTAssertFalse(notice.waitForExistence(timeout: 15), "The riba warning showed without Family")
     }
 }
