@@ -389,6 +389,7 @@ final class MockUserFeaturePreferences: UserFeaturePreferring, @unchecked Sendab
     var boolPreferences: [FeatureFlagID: Bool] = [:]
     var searchBarPosition = SearchBarPosition.bottom
     var startAtHomeSetting = StartAtHome.afterFourHours
+    var onSetPreference: (() -> Void)?
 
     func getPreferenceFor(_ flag: FeatureFlagID) -> Bool {
         return boolPreferences[flag] ?? false
@@ -396,6 +397,7 @@ final class MockUserFeaturePreferences: UserFeaturePreferring, @unchecked Sendab
 
     func setPreferenceFor(_ flag: FeatureFlagID, to value: Bool) {
         boolPreferences[flag] = value
+        onSetPreference?()
     }
 
     func setSearchBarPosition(_ position: SearchBarPosition) { searchBarPosition = position }

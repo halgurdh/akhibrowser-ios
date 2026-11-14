@@ -532,6 +532,73 @@ final class BrowserCoordinatorTests: XCTestCase,
         XCTAssertTrue(subject.childCoordinators.first is CameraCoordinator)
     }
 
+    // MARK: - VPN alerts
+
+    func testShowVPNFailureAlert_presentsAlertWithActions() throws {
+        let subject = createSubject()
+        subject.browserViewController = browserViewController
+
+        subject.showVPNFailureAlert()
+
+        let alert = try XCTUnwrap(browserViewController.viewControllerToPresent as? UIAlertController)
+        XCTAssertEqual(alert.title, .VPN.ErrorBrowsingPopup.Title)
+        XCTAssertEqual(alert.message, .VPN.ErrorBrowsingPopup.Body)
+        XCTAssertEqual(alert.actions.map(\.title), [
+            .VPN.ErrorBrowsingPopup.Continue,
+            .VPN.ErrorBrowsingPopup.CloseAllTabs,
+            .VPN.ErrorBrowsingPopup.CloseThisTab
+        ])
+        XCTAssertEqual(alert.actions.first?.style, .destructive)
+    }
+
+    func testShowVPNDataLimitAlert_presentsAlertWithDataLimitAndActions() throws {
+        let subject = createSubject()
+        subject.browserViewController = browserViewController
+
+        subject.showVPNDataLimitAlert(dataLimitBytes: 50_000_000_000)
+
+        let alert = try XCTUnwrap(browserViewController.viewControllerToPresent as? UIAlertController)
+        XCTAssertEqual(alert.title, .VPN.ReachedDataLimitPopup.Title)
+        XCTAssertEqual(alert.message, String(format: .VPN.ReachedDataLimitPopup.Body, "50"))
+        XCTAssertEqual(alert.actions.map(\.title), [
+            .VPN.ErrorBrowsingPopup.Continue,
+            .VPN.ReachedDataLimitPopup.CloseAllTabs,
+            .VPN.ReachedDataLimitPopup.CloseThisTab
+        ])
+        XCTAssertEqual(alert.actions.first?.style, .destructive)
+    }
+
+    func testShowVPNAlert_whileVPNAlertStillAlive_doesNotPresentAnother() throws {
+        let subject = createSubject()
+        subject.browserViewController = browserViewController
+        subject.showVPNFailureAlert()
+        let firstAlert = try XCTUnwrap(browserViewController.viewControllerToPresent as? UIAlertController)
+        // Clear the mock so a second alert would be presented on it rather than on `firstAlert`.
+        browserViewController.viewControllerToPresent = nil
+
+        withExtendedLifetime(firstAlert) {
+            subject.showVPNFailureAlert()
+            subject.showVPNDataLimitAlert(dataLimitBytes: 50_000_000_000)
+        }
+
+        XCTAssertNil(browserViewController.viewControllerToPresent)
+    }
+
+    func testShowVPNAlert_afterPreviousVPNAlertReleased_presentsNewAlert() {
+        let subject = createSubject()
+        subject.browserViewController = browserViewController
+        // The alert is autoreleased, so drain the pool to release it with the mock's reference.
+        autoreleasepool {
+            subject.showVPNFailureAlert()
+            browserViewController.viewControllerToPresent = nil
+        }
+
+        subject.showVPNDataLimitAlert(dataLimitBytes: 50_000_000_000)
+
+        let alert = browserViewController.viewControllerToPresent as? UIAlertController
+        XCTAssertEqual(alert?.title, .VPN.ReachedDataLimitPopup.Title)
+    }
+
     func testSearchGoogleLens_fromToolbarButton_startsSearchTimer() throws {
         let tab = MockTab(profile: profile, windowUUID: windowUUID)
         tab.webView = MockTabWebView(tab: tab)
@@ -1975,24 +2042,6 @@ final class BrowserCoordinatorTests: XCTestCase,
         XCTAssertEqual(browserViewController.handleQuery, "firefox")
     }
 
-    func testHandle_completesPendingDeeplinkTabActivity() {
-        let subject = createSubject()
-        subject.browserViewController = browserViewController
-        subject.browserHasLoaded()
-        AppEventQueue.started(.pendingDeeplinkTab(windowUUID))
-        defer {
-            if AppEventQueue.activityIsInProgress(.pendingDeeplinkTab(windowUUID)) {
-                AppEventQueue.completed(.pendingDeeplinkTab(windowUUID))
-            }
-        }
-        XCTAssertTrue(AppEventQueue.activityIsInProgress(.pendingDeeplinkTab(windowUUID)))
-
-        let route = Route.search(url: URL(string: "https://example.com")!, isPrivate: false)
-        subject.handle(route: route)
-
-        XCTAssertFalse(AppEventQueue.activityIsInProgress(.pendingDeeplinkTab(windowUUID)))
-    }
-
     // MARK: - StoreTestUtility
     func setupAppState() -> AppState {
         return AppState()
@@ -2040,7 +2089,7 @@ final class BrowserCoordinatorTests: XCTestCase,
     }
 
     private func setIsDeeplinkOptimizationRefactorEnabled(_ enabled: Bool) {
-        FxNimbus.shared.features.deeplinkOptimizationRefactorFeature.with { _, _ in
+        FxNimbus.shared.features.deeplinkOptimizationRefactorFeature.with { _ in
             return DeeplinkOptimizationRefactorFeature(enabled: enabled)
         }
     }
@@ -2052,7 +2101,7 @@ final class BrowserCoordinatorTests: XCTestCase,
     }
 
     private func setIsAppAttestEnabled(_ isEnabled: Bool) {
-        FxNimbus.shared.features.summarizerAppAttestAuthFeature.with { _, _ in
+        FxNimbus.shared.features.summarizerAppAttestAuthFeature.with { _ in
             return SummarizerAppAttestAuthFeature(enabled: true)
         }
     }
@@ -2063,7 +2112,7 @@ final class BrowserCoordinatorTests: XCTestCase,
         } else {
             featureFlags.enabledFlags.remove(.tabTrayUIExperiments)
         }
-        FxNimbus.shared.features.tabTrayUiExperiments.with { _, _ in
+        FxNimbus.shared.features.tabTrayUiExperiments.with { _ in
             return TabTrayUiExperiments(
                 enabled: isEnabled
             )

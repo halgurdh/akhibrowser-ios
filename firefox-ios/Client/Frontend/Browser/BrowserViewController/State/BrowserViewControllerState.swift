@@ -40,6 +40,8 @@ struct BrowserViewControllerState: ScreenState {
         case translationLanguagePicker(TranslationLanguagePickerData)
         case googleLensPhotoPicker
         case googleLensCamera
+        case vpnFailureAlert
+        case vpnDataLimitAlert(dataLimitBytes: Int64)
     }
 
     let windowUUID: WindowUUID
@@ -141,8 +143,16 @@ struct BrowserViewControllerState: ScreenState {
     static let reducer: Reducer<Self> = (legacyReducer, modernReducer)
 
     static let modernReducer: ReducerMethod<Self> = { state, action, actionWindowUUID in
-        // Does not handle any modern actions
-        return defaultState(from: state)
+        guard let action = action as? VPNAlertModernAction,
+              actionWindowUUID == .unavailable || actionWindowUUID == state.windowUUID
+        else { return defaultState(from: state) }
+
+        switch action {
+        case .showFailureAlert:
+            return state.resetTransientState().copy(displayView: .vpnFailureAlert)
+        case .showDataLimitAlert(let dataLimitBytes):
+            return state.resetTransientState().copy(displayView: .vpnDataLimitAlert(dataLimitBytes: dataLimitBytes))
+        }
     }
 
     static let legacyReducer: LegacyReducerMethod<Self> = { state, action in
@@ -290,9 +300,6 @@ struct BrowserViewControllerState: ScreenState {
         state: BrowserViewControllerState
     ) -> BrowserViewControllerState {
         switch action.actionType {
-        case ToolbarActionType.didDeleteSearchTerm:
-            guard case .webview = state.browserViewType else { return passthroughState(from: state, action: action) }
-            return stateForToolbarAction(action, state)
         case ToolbarActionType.didStartEditingUrl:
             return stateForToolbarAction(action, state)
         default:

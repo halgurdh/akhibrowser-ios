@@ -156,6 +156,28 @@ final class BrowserScreen {
         assertExampleDomainTextExists(timeout: timeout)
     }
 
+    /// Loads the Book of Mozilla test page and asserts it, retrying once for the same reason as
+    /// `navigateToURLAndAssertMobileUserAgent` (https://github.com/mozilla-mobile/firefox-ios/issues/35933).
+    func navigateToURLAndAssertBookOfMozilla(_ url: String, timeout: TimeInterval = TIMEOUT) {
+        navigateToURL(url)
+        if bookOfMozillaPageContentExists(timeout: timeout) {
+            return
+        }
+        navigateToURL(url)
+        assertBookOfMozillaPageDisplayed(timeout: timeout)
+    }
+
+    /// Loads `url` and asserts the address bar shows `host`, retrying once for the same reason as
+    /// `navigateToURLAndAssertMobileUserAgent` (https://github.com/mozilla-mobile/firefox-ios/issues/35933).
+    func navigateToURLAndAssertAddressBarContains(_ url: String, host: String, timeout: TimeInterval = TIMEOUT) {
+        navigateToURL(url)
+        if addressBarContains(host, timeout: timeout) {
+            return
+        }
+        navigateToURL(url)
+        assertAddressBarContains(value: host, timeout: timeout)
+    }
+
     func assertDesktopUserAgentIsDisplayed(timeout: TimeInterval = TIMEOUT) {
         assertUserAgentTextExists("DESKTOP_UA", timeout: timeout)
     }
@@ -337,6 +359,15 @@ final class BrowserScreen {
         start.press(forDuration: 1, thenDragTo: end)
     }
 
+    /// Drags the bottom address bar up to mid-screen, the release zone that opens the tab tray
+    /// rather than closing the tab.
+    func swipeUpOnAddressBar(timeout: TimeInterval = TIMEOUT) {
+        addressBar.mozWaitElementHittable(timeout: timeout)
+        let start = addressBar.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let end = app.windows.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        start.press(forDuration: 0.05, thenDragTo: end)
+    }
+
     /// Taps the "<" chevron shown next to the address bar while it is being edited.
     func tapCancelEditButton() {
         cancelButton.waitAndTap()
@@ -390,6 +421,17 @@ final class BrowserScreen {
         urlElement.waitAndTap()
     }
 
+    /// The address bar shows only the host until it is edited, so the full URL is read in edit mode.
+    func assertLoadedURLStarts(with prefix: String, timeout: TimeInterval = TIMEOUT) {
+        tapOnAddressBar()
+        let startsWithPrefix = NSPredicate(format: "value BEGINSWITH %@", prefix)
+        let expectation = XCTNSPredicateExpectation(predicate: startsWithPrefix, object: addressBar)
+        let result = XCTWaiter().wait(for: [expectation], timeout: timeout)
+        let url = addressBar.value as? String ?? ""
+        XCTAssertEqual(result, .completed, "The URL should start with '\(prefix)', but was '\(url)'")
+        dismissURLBarOverlay()
+    }
+
     // Pastes the clipboard contents into the (already focused) address bar and asserts the resulting
     // value. Used to verify clipboard content in-app, avoiding the iOS 16+ cross-process paste prompt.
     func pasteAndAssertAddressBarContains(_ value: String) {
@@ -423,6 +465,14 @@ final class BrowserScreen {
     func navigateToURL(_ url: String) {
         tapOnAddressBar()
         addressBar.typeText(url)
+        addressBar.typeText("\r")
+    }
+
+    /// Unlike `navigateToURL`, clears the field first, so typing over a loaded page cannot append to its URL.
+    func openURL(_ url: String) {
+        tapOnAddressBar()
+        clearAddressBarText()
+        addressBar.tapAndTypeTextWhenFocused(url)
         addressBar.typeText("\r")
     }
 
@@ -860,6 +910,11 @@ final class BrowserScreen {
         BaseTestCase().mozWaitForElementToExist(link, timeout: timeout)
     }
 
+    func tapLink(named name: String) {
+        let link = Selector.linkByLabel(name, description: "'\(name)' link in the web page", groups: ["browser"])
+        link.element(in: app).waitAndTap()
+    }
+
     func assertWebViewLinkTextExists(text: String, timeout: TimeInterval = TIMEOUT) {
         let linkText = app.webViews.links.staticTexts[text]
         BaseTestCase().mozWaitForElementToExist(linkText, timeout: timeout)
@@ -880,6 +935,17 @@ final class BrowserScreen {
 
     func tapPrivateModeActivityLink() {
         sel.PRIVATE_MODE_HOMEPAGE_LINK.element(in: app).waitAndTap()
+    }
+
+    /// Taps Login on the cookie test page, which stores its login cookies, and waits for LOGGED_IN.
+    func logInOnCookiePage() {
+        let webview = app.webViews.firstMatch
+        webview.buttons["Login"].waitAndTap()
+        assertCookiePageLoggedIn()
+    }
+
+    func assertCookiePageLoggedIn() {
+        BaseTestCase().mozWaitForElementToExist(app.webViews.firstMatch.staticTexts["LOGGED_IN"])
     }
 
     func assertCookiePageLoaded() {

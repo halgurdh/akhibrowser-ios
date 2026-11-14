@@ -691,6 +691,7 @@ enum AccessibilityIdentifiers {
             static let websiteDataSection = "WebsiteData"
             static let clearPrivateDataSection = "ClearPrivateData"
             static let clearAllWebsiteData = "ClearAllWebsiteData"
+            static let importBrowserData = "ImportBrowserData"
         }
 
         enum Notifications {
@@ -852,6 +853,18 @@ enum AccessibilityIdentifiers {
 
         enum VPN {
             static let title = "Settings.VPN.Title"
+            static let heading = "Settings.VPN.Heading"
+            static let description = "Settings.VPN.Description"
+            static let learnMoreButton = "Settings.VPN.LearnMoreButton"
+            static let locationSetting = "Settings.VPN.LocationSetting"
+            static let vpnToggle = "Settings.VPN.VPNToggle"
+            static let dataUsage = "Settings.VPN.DataUsage"
+
+            enum Locations {
+                static let recommendedLocation = "Settings.VPN.Locations.RecommendedLocation"
+                static let location = "Settings.VPN.Locations.Location"
+                static let loadingIndicator = "Settings.VPN.Locations.LoadingIndicator"
+            }
         }
 
         enum BlockImages {
@@ -904,7 +917,6 @@ enum AccessibilityIdentifiers {
         static let compactTitleLabel = "summaryCompactTitleLabel"
         static let loadingLabel = "summaryLoadingLabel"
         static let brandLabel = "summaryBrandLabel"
-        static let brandImage = "summaryBrandImage"
         static let summaryTableView = "summaryTextView"
         static let errorContentView = "errorContentView"
         static let retryErrorButton = "retryErrorButton"
