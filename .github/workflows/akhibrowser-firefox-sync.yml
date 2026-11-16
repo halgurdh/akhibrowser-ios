@@ -3,7 +3,7 @@
 # takes firefox-daily when it's ready. A conflict, or something AkhiBrowser removed coming back
 # (.github/scripts/firefox_sync_guard.py), stops it with an issue and a mail (.github/scripts/notify.sh).
 # firefox-daily keeps its merges, so a conflict solved there once stays solved; AkhiBrowser's main is merged into it first.
-# Secrets: AKHI_OPS_TOKEN (the mails; without it only the issue), AKHI_PUSH_TOKEN (a token with contents and workflows
+# Secrets: AKHI_OPS_TOKEN (the mails; without it only the issue), AKHI_SUBMODULES_TOKEN (retries a refused push), AKHI_PUSH_TOKEN (a token with contents and workflows
 # write on this repository: Mozilla often changes files under .github/workflows, which the workflow's own token can't
 # push; without it such a merge stops at the push).
 name: AkhiBrowser Firefox sync
@@ -97,9 +97,9 @@ jobs:
             exit 0
           fi
           if [ "$(git rev-parse HEAD)" != "${{ steps.start.outputs.daily }}" ]; then
-            if ! git push origin HEAD:refs/heads/firefox-daily 2> "$RUNNER_TEMP/push.log"; then
+            if ! { git push origin HEAD:refs/heads/firefox-daily 2> "$RUNNER_TEMP/push.log" || { [ -n "${{ secrets.AKHI_SUBMODULES_TOKEN }}" ] && git -c http.https://github.com/.extraheader= push "https://x-access-token:${{ secrets.AKHI_SUBMODULES_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:refs/heads/firefox-daily 2>> "$RUNNER_TEMP/push.log"; }; }; then
               { echo "### firefox-daily couldn't be pushed"; echo '```'; cat "$RUNNER_TEMP/push.log"; echo '```'
-                echo "If it's about workflow files, add the secret AKHI_PUSH_TOKEN (contents and workflows write)."; } > "$REPORT"
+                echo "If it's about workflow files: AKHI_SUBMODULES_TOKEN (the retry) needs Contents and Workflows write on this repository."; } > "$REPORT"
               echo "failed=true" >> "$GITHUB_OUTPUT"
               exit 0
             fi
