@@ -419,6 +419,8 @@
 		27BD010D30645F330015306B /* WallpaperBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27BD010630645F330015306B /* WallpaperBaseViewController.swift */; };
 		27BD010E30645F330015306B /* WallpaperSettingsHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27BD010930645F330015306B /* WallpaperSettingsHeaderView.swift */; };
 		27BD010F30645F330015306B /* WallpaperSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27BD010830645F330015306B /* WallpaperSettingsViewModel.swift */; };
+		27C45C9130A0FD8000E1E4E3 /* NativeMenuHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C45C9030A0FD7900E1E4E3 /* NativeMenuHelper.swift */; };
+		27C4644630A211B300E1E4E3 /* NativeMenuHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C4644530A211AD00E1E4E3 /* NativeMenuHelperTests.swift */; };
 		2816F0001B33E05400522243 /* UIConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2816EFFF1B33E05400522243 /* UIConstants.swift */; };
 		281B029A1C037C1F005202C3 /* TestBrowserDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 281B02991C037C1F005202C3 /* TestBrowserDB.swift */; };
 		281B2BEA1ADF4D90002917DC /* MockProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 281B2BE91ADF4D90002917DC /* MockProfile.swift */; };
@@ -848,6 +850,7 @@
 		638201093038D86C003C51C5 /* SectionHeaderConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 638201083038D85F003C51C5 /* SectionHeaderConfigurationTests.swift */; };
 		63B213282CCA796D00A466DB /* NativeErrorPageAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B213272CCA796D00A466DB /* NativeErrorPageAction.swift */; };
 		63B2132A2CCA797400A466DB /* NativeErrorPageState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B213292CCA797400A466DB /* NativeErrorPageState.swift */; };
+		63DB6BF930A3899C00EB94B4 /* EmbeddedAddressBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63DB6BF830A3899800EB94B4 /* EmbeddedAddressBarView.swift */; };
 		63F7A9AA2C7529ED005846F5 /* NativeErrorPageModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F7A9A92C7529ED005846F5 /* NativeErrorPageModel.swift */; };
 		63F7A9AC2C752BB0005846F5 /* NativeErrorPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F7A9AB2C752BB0005846F5 /* NativeErrorPageViewController.swift */; };
 		6669B5E2211418A200CA117B /* WebsiteDataSearchResultsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6669B5E1211418A200CA117B /* WebsiteDataSearchResultsViewController.swift */; };
@@ -2232,6 +2235,7 @@
 		E1EAA5EF2D49182700D3039C /* NavigationBarStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EAA5EE2D49181600D3039C /* NavigationBarStateTests.swift */; };
 		E1EAA5F12D49470900D3039C /* ToolbarStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EAA5F02D49470000D3039C /* ToolbarStateTests.swift */; };
 		E1EAA5F32D4A705500D3039C /* ToolbarMiddlewareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EAA5F22D4A705300D3039C /* ToolbarMiddlewareTests.swift */; };
+		B0B0C0DE2F00000100A1B2C3 /* ToolbarBorderBehaviorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0DE2F00000200A1B2C3 /* ToolbarBorderBehaviorTests.swift */; };
 		E1FD75E32E437E3F00C060DC /* TabTrayUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1FD75E22E437E3500C060DC /* TabTrayUtils.swift */; };
 		E1FE132F29C0B3CB002A65FF /* NotificationSurfaceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1FE132E29C0B3CB002A65FF /* NotificationSurfaceManager.swift */; };
 		E1FE133129C22726002A65FF /* BackgroundFetchAndProcessingUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1FE133029C22726002A65FF /* BackgroundFetchAndProcessingUtility.swift */; };
@@ -3486,6 +3490,8 @@
 		27BD010730645F330015306B /* WallpaperSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperSettingsViewController.swift; sourceTree = "<group>"; };
 		27BD010830645F330015306B /* WallpaperSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperSettingsViewModel.swift; sourceTree = "<group>"; };
 		27BD010930645F330015306B /* WallpaperSettingsHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperSettingsHeaderView.swift; sourceTree = "<group>"; };
+		27C45C9030A0FD7900E1E4E3 /* NativeMenuHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeMenuHelper.swift; sourceTree = "<group>"; };
+		27C4644530A211AD00E1E4E3 /* NativeMenuHelperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeMenuHelperTests.swift; sourceTree = "<group>"; };
 		2816EFFF1B33E05400522243 /* UIConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIConstants.swift; sourceTree = "<group>"; };
 		281B02991C037C1F005202C3 /* TestBrowserDB.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestBrowserDB.swift; sourceTree = "<group>"; };
 		281B2BE91ADF4D90002917DC /* MockProfile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = MockProfile.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -9974,6 +9980,7 @@
 		63B213272CCA796D00A466DB /* NativeErrorPageAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NativeErrorPageAction.swift; sourceTree = "<group>"; };
 		63B213292CCA797400A466DB /* NativeErrorPageState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NativeErrorPageState.swift; sourceTree = "<group>"; };
 		63D99A1EBA034A54803AB9FC /* AppAcquisitionProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAcquisitionProvider.swift; sourceTree = "<group>"; };
+		63DB6BF830A3899800EB94B4 /* EmbeddedAddressBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddedAddressBarView.swift; sourceTree = "<group>"; };
 		63F7A9A92C7529ED005846F5 /* NativeErrorPageModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeErrorPageModel.swift; sourceTree = "<group>"; };
 		63F7A9AB2C752BB0005846F5 /* NativeErrorPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeErrorPageViewController.swift; sourceTree = "<group>"; };
 		63FE433D87018CDDFCF592E3 /* sk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sk; path = sk.lproj/ErrorPages.strings; sourceTree = "<group>"; };
@@ -12454,6 +12461,7 @@
 		E1EAA5EE2D49181600D3039C /* NavigationBarStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationBarStateTests.swift; sourceTree = "<group>"; };
 		E1EAA5F02D49470000D3039C /* ToolbarStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarStateTests.swift; sourceTree = "<group>"; };
 		E1EAA5F22D4A705300D3039C /* ToolbarMiddlewareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarMiddlewareTests.swift; sourceTree = "<group>"; };
+		B0B0C0DE2F00000200A1B2C3 /* ToolbarBorderBehaviorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarBorderBehaviorTests.swift; sourceTree = "<group>"; };
 		E1FD75E22E437E3500C060DC /* TabTrayUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabTrayUtils.swift; sourceTree = "<group>"; };
 		E1FE132E29C0B3CB002A65FF /* NotificationSurfaceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSurfaceManager.swift; sourceTree = "<group>"; };
 		E1FE133029C22726002A65FF /* BackgroundFetchAndProcessingUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundFetchAndProcessingUtility.swift; sourceTree = "<group>"; };
@@ -14943,6 +14951,7 @@
 		8A09BCC12D22F1A500CFDF60 /* ContextMenu */ = {
 			isa = PBXGroup;
 			children = (
+				27C4644530A211AD00E1E4E3 /* NativeMenuHelperTests.swift */,
 				8A4B66412D1DC962008C5B64 /* ContextMenuConfigurationTests.swift */,
 				8A09BCC22D22F1BE00CFDF60 /* ContextMenuCoordinatorTests.swift */,
 			);
@@ -15382,6 +15391,7 @@
 		8A62B15B2CED40800045F46E /* ContextMenu */ = {
 			isa = PBXGroup;
 			children = (
+				27C45C9030A0FD7900E1E4E3 /* NativeMenuHelper.swift */,
 				8AC0B1BF2D1D9356004237FD /* ContextMenuConfiguration.swift */,
 				8A62B15C2CED408B0045F46E /* ContextMenuState.swift */,
 				8A5564012D23317100028CA7 /* ContextMenuAction.swift */,
@@ -15441,6 +15451,7 @@
 		8A7C125F2E01DB0600F2D7FA /* SearchBar */ = {
 			isa = PBXGroup;
 			children = (
+				63DB6BF830A3899800EB94B4 /* EmbeddedAddressBarView.swift */,
 				354F8F602E09820B007DFFEB /* SearchBarState.swift */,
 				8A7C12602E01DB0C00F2D7FA /* SearchBarCell.swift */,
 			);
@@ -17566,6 +17577,7 @@
 				E14C78952C105488002AD3C7 /* AddressToolbarContainerModelTests.swift */,
 				E1EAA5EE2D49181600D3039C /* NavigationBarStateTests.swift */,
 				E1EAA5F22D4A705300D3039C /* ToolbarMiddlewareTests.swift */,
+				B0B0C0DE2F00000200A1B2C3 /* ToolbarBorderBehaviorTests.swift */,
 				E1EAA5F02D49470000D3039C /* ToolbarStateTests.swift */,
 				BDB4E7202F337AAB000DB45F /* LocationTextFieldTests.swift */,
 			);
@@ -21503,6 +21515,7 @@
 				21E78A7228F9A93100F8D687 /* UIDeviceInterface.swift in Sources */,
 				EBB89508219398E500EB91A0 /* ContentBlocker+Safelist.swift in Sources */,
 				EEB96A222FBF4B8300D6C232 /* ReaderFileRoute.swift in Sources */,
+				63DB6BF930A3899C00EB94B4 /* EmbeddedAddressBarView.swift in Sources */,
 				C838FD5E289981240068F60B /* WallpaperURLProvider.swift in Sources */,
 				0B3F8C5E2CA4471C00DB5367 /* EditBookmarkViewModel.swift in Sources */,
 				8AD0110D2CB42FE700368BF3 /* HeaderState.swift in Sources */,
@@ -21520,6 +21533,7 @@
 				4347B398298D6D7B0045F677 /* CreditCardTableViewModel.swift in Sources */,
 				D3A9949D1A3686BD008AD1AC /* Tab.swift in Sources */,
 				EDADF77A2D70BD3E00C39295 /* AppIconSelectionTelemetry.swift in Sources */,
+				27C45C9130A0FD8000E1E4E3 /* NativeMenuHelper.swift in Sources */,
 				EC0FBD1F300530E9005CCA62 /* FolderSectionHeaderView.swift in Sources */,
 				A93067E81D0FE18E00C49C6E /* NightModeHelper.swift in Sources */,
 				742BD99E2A13AC9000BA6B15 /* OnboardingInstructionPopupViewController.swift in Sources */,
@@ -21971,6 +21985,7 @@
 				630EBE4D301109A30046E9BC /* GradientProgressBarTests.swift in Sources */,
 				C27484E42F55C4B600920313 /* MockSummarizerConfigFactory.swift in Sources */,
 				E1EAA5F32D4A705500D3039C /* ToolbarMiddlewareTests.swift in Sources */,
+				B0B0C0DE2F00000100A1B2C3 /* ToolbarBorderBehaviorTests.swift in Sources */,
 				8AA8389D2CA2FEFC003FA256 /* StoreTestUtility.swift in Sources */,
 				8C196D512F7D2B74006EB316 /* AutoTranslatePromptStateTests.swift in Sources */,
 				C27484E02F558C2800920313 /* MockSummarizerLanguageProvider.swift in Sources */,
@@ -22085,6 +22100,7 @@
 				215360652D9475DA00D9B8E6 /* BrowsingSettingsViewControllerTests.swift in Sources */,
 				C7F5684BA329455783CCB300 /* AdBlockerSettingTests.swift in Sources */,
 				BGA100010000000100000001 /* BackgroundAudioHelperTests.swift in Sources */,
+				27C4644630A211B300E1E4E3 /* NativeMenuHelperTests.swift in Sources */,
 				BGA100010000000100000003 /* BackgroundAudioSettingTests.swift in Sources */,
 				BEEF00012F00000200000001 /* SearchSettingsTableViewControllerTests.swift in Sources */,
 				EEFBE6DA3091115100522F96 /* VPNSettingsViewControllerTests.swift in Sources */,
