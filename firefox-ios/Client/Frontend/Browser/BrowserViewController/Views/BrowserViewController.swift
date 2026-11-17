@@ -2558,12 +2558,8 @@ class BrowserViewController: UIViewController,
             loading = doc.isDownloading
         }
 
-        let action = ToolbarAction(
-            isLoading: loading,
-            windowUUID: windowUUID,
-            actionType: ToolbarActionType.websiteLoadingStateDidChange
-        )
-        store.dispatch(action)
+        store.dispatch(ToolbarModernAction.websiteLoadingStateDidChange(isLoading: loading),
+                       forWindowUUID: windowUUID)
     }
 
     private func handleURL(url: URL?, tab: Tab, webView: WKWebView) {
@@ -2968,12 +2964,8 @@ class BrowserViewController: UIViewController,
             // There is an edge case in which calling stop on the webView doesn't update webView's isLoading var.
             // To make sure we show the correct button change toolbar state directly when the user stops loading
             // the website.
-            let action = ToolbarAction(
-                isLoading: false,
-                windowUUID: windowUUID,
-                actionType: ToolbarActionType.websiteLoadingStateDidChange
-            )
-            store.dispatch(action)
+            store.dispatch(ToolbarModernAction.websiteLoadingStateDidChange(isLoading: false),
+                           forWindowUUID: windowUUID)
             addressToolbarContainer.updateProgressBar(progress: 0.0)
         case .newTab:
             willNavigateAway(from: tabManager.selectedTab)
@@ -4702,12 +4694,7 @@ extension BrowserViewController: SearchViewControllerDelegate {
     }
 
     func setLocationView(text: String, search: Bool) {
-        let toolbarAction = ToolbarAction(
-            searchTerm: text,
-            windowUUID: windowUUID,
-            actionType: ToolbarActionType.didSetTextInLocationView
-        )
-        store.dispatch(toolbarAction)
+        store.dispatch(ToolbarModernAction.searchTermDidSet(searchTerm: text), forWindowUUID: windowUUID)
 
         if search {
             openSuggestions(searchTerm: text)
