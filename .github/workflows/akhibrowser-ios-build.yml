@@ -23,7 +23,7 @@ jobs:
       DERIVED: ${{ github.workspace }}/DerivedData
       OUT: ${{ github.workspace }}/out
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           token: ${{ secrets.AKHI_SUBMODULES_TOKEN || github.token }}
@@ -229,7 +229,7 @@ jobs:
             ditto -c -k --keepParent "$app" "$OUT/AkhiBrowser-ios-simulator.app.zip"
           fi
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: akhibrowser-ios-${{ github.run_number }}
@@ -245,7 +245,7 @@ jobs:
       DERIVED: ${{ github.workspace }}/DerivedData
       OUT: ${{ github.workspace }}/out
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           token: ${{ secrets.AKHI_SUBMODULES_TOKEN || github.token }}
@@ -351,7 +351,7 @@ jobs:
             --repo halgurdh/akhi-extension --draft --title "iOS UI tests ${{ github.run_number }}" \
             --notes "Screenshots of the Family and SafeSearch UI tests, from ${{ github.sha }}"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: akhibrowser-ios-ui-tests-${{ github.run_number }}
@@ -363,7 +363,7 @@ jobs:
   cleanup:
     needs: [build, ui-tests]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       GH_TOKEN: ${{ secrets.AKHI_SUBMODULES_TOKEN }}
     steps:
